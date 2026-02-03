@@ -17,31 +17,14 @@
  * @license AGPL-3.0
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import { Building2, Sun, Leaf, RefreshCw, ExternalLink, Settings } from 'lucide-react';
 import { OdooProvider, useOdoo } from './services/context';
 import './index.css';
 
-type TabType = 'erp' | 'energy' | 'farm' | 'settings';
-
 const OdooContent: React.FC = () => {
   const { tenantInfo, isLoading, error, refreshTenant, provisionOdoo } = useOdoo();
   const [isProvisioning, setIsProvisioning] = useState(false);
-  const [activeTab, setActiveTab] = useState<TabType>('erp');
-  const [iframeLoaded, setIframeLoaded] = useState(false);
-
-  const getOdooUrl = useCallback(() => {
-    if (!tenantInfo?.odooUrl) return '';
-
-    const paths: Record<TabType, string> = {
-      erp: '/web',
-      energy: '/web#menu_id=energy_community',
-      farm: '/web#menu_id=stock',
-      settings: '/web#menu_id=settings'
-    };
-
-    return `${tenantInfo.odooUrl}${paths[activeTab]}`;
-  }, [tenantInfo, activeTab]);
 
   if (isLoading) {
     return (
