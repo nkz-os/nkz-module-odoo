@@ -8,14 +8,18 @@ Company: Robotika
 License: AGPL-3.0
 """
 
-from pydantic_settings import BaseSettings
-from pydantic import field_validator
+from pydantic_settings import BaseSettings, SettingsConfigDict
 from functools import lru_cache
-from typing import Union
 
 
 class Settings(BaseSettings):
     """Application settings loaded from environment variables."""
+
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        case_sensitive=True
+    )
 
     # API Settings
     API_TITLE: str = "Nekazari Odoo ERP Module API"
@@ -56,20 +60,13 @@ class Settings(BaseSettings):
     # Intelligence Module
     INTELLIGENCE_API_URL: str = "http://intelligence-api-service:8000"
 
-    # Allowed Origins for CORS (accepts comma-separated string or list)
-    ALLOWED_ORIGINS: list[str] = [
-        "https://nekazari.artotxiki.com",
-        "http://localhost:5010",
-        "http://localhost:5173"
-    ]
+    # Allowed Origins for CORS (stored as comma-separated string)
+    ALLOWED_ORIGINS_STR: str = "https://nekazari.artotxiki.com,http://localhost:5010,http://localhost:5173"
 
-    @field_validator('ALLOWED_ORIGINS', mode='before')
-    @classmethod
-    def parse_allowed_origins(cls, v: Union[str, list]) -> list[str]:
-        """Parse ALLOWED_ORIGINS from comma-separated string or list."""
-        if isinstance(v, str):
-            return [origin.strip() for origin in v.split(',') if origin.strip()]
-        return v
+    @property
+    def allowed_origins(self) -> list[str]:
+        """Get allowed origins as a list."""
+        return [origin.strip() for origin in self.ALLOWED_ORIGINS_STR.split(',') if origin.strip()]
 
     @property
     def odoo_url(self) -> str:
@@ -82,11 +79,6 @@ class Settings(BaseSettings):
         if self.JWKS_URL:
             return self.JWKS_URL
         return f"{self.KEYCLOAK_URL}/realms/{self.KEYCLOAK_REALM}/protocol/openid-connect/certs"
-
-    class Config:
-        env_file = ".env"
-        env_file_encoding = "utf-8"
-        case_sensitive = True
 
 
 @lru_cache()

@@ -95,7 +95,7 @@ spec:
             - name: INTELLIGENCE_API_URL
               value: "http://intelligence-api-service:8000"
             # CORS
-            - name: ALLOWED_ORIGINS
+            - name: ALLOWED_ORIGINS_STR
               value: "https://nekazari.artotxiki.com,https://*.odoo.nkz.artotxiki.com"
           resources:
             requests:
