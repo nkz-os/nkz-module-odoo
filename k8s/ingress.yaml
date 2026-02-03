@@ -84,8 +84,8 @@ spec:
       secretName: nekazari-tls
 
 ---
-# Odoo direct access (optional - for iframe embedding)
-# Note: This exposes Odoo at odoo.nkz.artotxiki.com
+# Odoo direct access via nkz.artotxiki.com/odoo path
+# Uses existing nkz-tls certificate
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -95,16 +95,15 @@ metadata:
     app: odoo
     module: odoo-erp
   annotations:
-    cert-manager.io/cluster-issuer: letsencrypt-prod
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
     traefik.ingress.kubernetes.io/router.tls: "true"
 spec:
   ingressClassName: traefik
   rules:
-    - host: odoo.nkz.artotxiki.com
+    - host: nkz.artotxiki.com
       http:
         paths:
-          - path: /
+          - path: /odoo
             pathType: Prefix
             backend:
               service:
@@ -113,5 +112,5 @@ spec:
                   number: 8069
   tls:
     - hosts:
-        - odoo.nkz.artotxiki.com
-      secretName: nkz-tls  # Use wildcard cert for *.nkz.artotxiki.com
+        - nkz.artotxiki.com
+      secretName: nkz-tls
