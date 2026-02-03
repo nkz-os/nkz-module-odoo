@@ -9,9 +9,15 @@
 
 set -e
 
+# Export variables for the official Odoo entrypoint
+# The official entrypoint expects HOST, USER, PASSWORD (without DB_ prefix)
+export HOST="${DB_HOST:-postgres-odoo-service}"
+export USER="${DB_USER:-odoo}"
+export PASSWORD="${DB_PASSWORD}"
+
 # Wait for PostgreSQL to be ready
 echo "Waiting for PostgreSQL..."
-while ! pg_isready -h "${DB_HOST:-postgres-odoo-service}" -p "${DB_PORT:-5432}" -U "${DB_USER:-odoo}" -q; do
+while ! pg_isready -h "${HOST}" -p "${DB_PORT:-5432}" -U "${USER}" -q; do
     sleep 2
 done
 echo "PostgreSQL is ready!"
@@ -19,15 +25,15 @@ echo "PostgreSQL is ready!"
 # Check if template database exists
 TEMPLATE_DB="${ODOO_TEMPLATE_DB:-nkz_odoo_template}"
 
-if ! PGPASSWORD="${DB_PASSWORD}" psql -h "${DB_HOST:-postgres-odoo-service}" -U "${DB_USER:-odoo}" -lqt | cut -d \| -f 1 | grep -qw "$TEMPLATE_DB"; then
+if ! PGPASSWORD="${PASSWORD}" psql -h "${HOST}" -U "${USER}" -lqt | cut -d \| -f 1 | grep -qw "$TEMPLATE_DB"; then
     echo "Creating template database: $TEMPLATE_DB"
 
     # Create template database with base modules
     # Note: We use --db-template=template1 to avoid circular reference
-    odoo --db_host="${DB_HOST:-postgres-odoo-service}" \
+    odoo --db_host="${HOST}" \
          --db_port="${DB_PORT:-5432}" \
-         --db_user="${DB_USER:-odoo}" \
-         --db_password="${DB_PASSWORD}" \
+         --db_user="${USER}" \
+         --db_password="${PASSWORD}" \
          --db-template=template1 \
          -d "$TEMPLATE_DB" \
          -i base,web,sale,purchase,stock,account,maintenance \
@@ -38,10 +44,10 @@ if ! PGPASSWORD="${DB_PASSWORD}" psql -h "${DB_HOST:-postgres-odoo-service}" -U 
 
     # Try to install energy modules if available
     echo "Installing energy modules..."
-    odoo --db_host="${DB_HOST:-postgres-odoo-service}" \
+    odoo --db_host="${HOST}" \
          --db_port="${DB_PORT:-5432}" \
-         --db_user="${DB_USER:-odoo}" \
-         --db_password="${DB_PASSWORD}" \
+         --db_user="${USER}" \
+         --db_password="${PASSWORD}" \
          -d "$TEMPLATE_DB" \
          -i nekazari_connector \
          --stop-after-init || echo "Warning: Some modules could not be installed"
