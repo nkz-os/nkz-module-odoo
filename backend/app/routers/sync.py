@@ -104,9 +104,14 @@ async def get_sync_status(
     try:
         status = await db_get_sync_status(tenant_id)
 
+        last_sync = status.get("last_sync") if status else None
+        # Convert datetime to ISO string if needed
+        if last_sync and hasattr(last_sync, 'isoformat'):
+            last_sync = last_sync.isoformat()
+        
         return SyncStatus(
             status=status.get("status", "unknown") if status else "never_synced",
-            lastSync=status.get("last_sync") if status else None
+            lastSync=last_sync
         )
 
     except Exception as e:
