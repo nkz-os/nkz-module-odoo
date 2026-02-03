@@ -112,6 +112,7 @@ async def init_db():
 
 async def get_tenant_odoo_info(tenant_id: str) -> Optional[dict]:
     """Get Odoo info for a tenant."""
+    import json
     pool = await get_pool()
 
     async with pool.acquire() as conn:
@@ -121,12 +122,20 @@ async def get_tenant_odoo_info(tenant_id: str) -> Optional[dict]:
         )
 
         if row:
-            return dict(row)
+            data = dict(row)
+            # Parse JSON fields
+            if isinstance(data.get("installed_modules"), str):
+                try:
+                    data["installed_modules"] = json.loads(data["installed_modules"])
+                except json.JSONDecodeError:
+                    data["installed_modules"] = []
+            return data
         return None
 
 
 async def save_tenant_odoo_info(tenant_id: str, info: Optional[dict]):
     """Save or delete Odoo info for a tenant."""
+    import json
     pool = await get_pool()
 
     async with pool.acquire() as conn:
@@ -156,7 +165,7 @@ async def save_tenant_odoo_info(tenant_id: str, info: Optional[dict]):
                 info.get("database"),
                 info.get("status"),
                 info.get("energy_modules_enabled", False),
-                str(info.get("installed_modules", [])),
+                json.dumps(info.get("installed_modules", [])),  # Use json.dumps for valid JSON
                 info.get("admin_email"),
                 info.get("created_at")
             )

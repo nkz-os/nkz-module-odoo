@@ -62,13 +62,13 @@ async def get_tenant_info(
 
         return TenantOdooInfo(
             id=tenant_id,
-            name=info.get("name", tenant_id),
-            odooDatabase=info.get("database", f"nkz_odoo_{tenant_id}"),
+            name=info.get("name") or tenant_id,
+            odooDatabase=info.get("database") or f"nkz_odoo_{tenant_id}",
             odooUrl=_build_tenant_odoo_url(tenant_id),
-            status=info.get("status", "unknown"),
+            status=info.get("status") or "unknown",
             lastSync=info.get("last_sync"),
-            energyModulesEnabled=info.get("energy_modules_enabled", False),
-            installedModules=info.get("installed_modules", [])
+            energyModulesEnabled=info.get("energy_modules_enabled") or False,
+            installedModules=info.get("installed_modules") or []
         )
 
     except HTTPException:
