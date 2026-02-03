@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+Nekazari Connector - Menu and Views
+
+Author: Kate Benetis <kate@robotika.cloud>
+Company: Robotika
+License: AGPL-3.0
+-->
+<odoo>
+    <!-- Sync Log Tree View -->
+    <record id="view_nekazari_sync_log_tree" model="ir.ui.view">
+        <field name="name">nekazari.sync.log.tree</field>
+        <field name="model">nekazari.sync.log</field>
+        <field name="arch" type="xml">
+            <tree string="Sync Logs" decoration-danger="state=='error'" decoration-success="state=='done'">
+                <field name="name"/>
+                <field name="sync_type"/>
+                <field name="direction"/>
+                <field name="model"/>
+                <field name="ngsi_type"/>
+                <field name="record_count"/>
+                <field name="state"/>
+                <field name="duration"/>
+                <field name="create_date"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Sync Log Form View -->
+    <record id="view_nekazari_sync_log_form" model="ir.ui.view">
+        <field name="name">nekazari.sync.log.form</field>
+        <field name="model">nekazari.sync.log</field>
+        <field name="arch" type="xml">
+            <form string="Sync Log">
+                <header>
+                    <button name="action_retry" type="object" string="Retry"
+                            class="oe_highlight" attrs="{'invisible': [('state', '!=', 'error')]}"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="sync_type"/>
+                            <field name="direction"/>
+                        </group>
+                        <group>
+                            <field name="model"/>
+                            <field name="ngsi_type"/>
+                            <field name="record_count"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group>
+                            <field name="start_date"/>
+                            <field name="end_date"/>
+                            <field name="duration"/>
+                        </group>
+                    </group>
+                    <group attrs="{'invisible': [('state', '!=', 'error')]}">
+                        <field name="error_message"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Sync Log Action -->
+    <record id="action_nekazari_sync_log" model="ir.actions.act_window">
+        <field name="name">Sync Logs</field>
+        <field name="res_model">nekazari.sync.log</field>
+        <field name="view_mode">tree,form</field>
+        <field name="context">{'search_default_today': 1}</field>
+    </record>
+
+    <!-- Menu Items -->
+    <menuitem id="menu_nekazari_root"
+              name="Nekazari"
+              web_icon="nekazari_connector,static/description/icon.png"
+              sequence="100"/>
+
+    <menuitem id="menu_nekazari_sync"
+              name="Synchronization"
+              parent="menu_nekazari_root"
+              sequence="10"/>
+
+    <menuitem id="menu_nekazari_sync_log"
+              name="Sync Logs"
+              parent="menu_nekazari_sync"
+              action="action_nekazari_sync_log"
+              sequence="10"/>
+
+    <!-- Add NGSI-LD fields to existing views -->
+
+    <!-- Product Template Form Extension -->
+    <record id="view_product_template_form_nekazari" model="ir.ui.view">
+        <field name="name">product.template.form.nekazari</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_only_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='general_information']" position="after">
+                <page string="Nekazari" name="nekazari">
+                    <group>
+                        <group string="NGSI-LD Integration">
+                            <field name="x_ngsi_id"/>
+                            <field name="x_ngsi_type"/>
+                            <field name="x_last_sync"/>
+                        </group>
+                        <group string="AgriParcel Data">
+                            <field name="x_area"/>
+                            <field name="x_crop_type"/>
+                            <field name="x_soil_type"/>
+                        </group>
+                    </group>
+                    <group string="AI Predictions">
+                        <field name="x_predicted_yield"/>
+                        <field name="x_yield_confidence" widget="progressbar"/>
+                    </group>
+                    <group string="Location">
+                        <field name="x_location" widget="text"/>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Maintenance Equipment Form Extension -->
+    <record id="view_maintenance_equipment_form_nekazari" model="ir.ui.view">
+        <field name="name">maintenance.equipment.form.nekazari</field>
+        <field name="model">maintenance.equipment</field>
+        <field name="inherit_id" ref="maintenance.hr_equipment_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='maintenance']" position="after">
+                <page string="Nekazari" name="nekazari">
+                    <group>
+                        <group string="NGSI-LD Integration">
+                            <field name="x_ngsi_id"/>
+                            <field name="x_ngsi_type"/>
+                            <field name="x_last_sync"/>
+                        </group>
+                        <group string="Device Data">
+                            <field name="x_device_type"/>
+                            <field name="x_status"/>
+                            <field name="x_firmware_version"/>
+                            <field name="x_battery_level" widget="progressbar"/>
+                            <field name="x_last_reading"/>
+                        </group>
+                    </group>
+                    <group string="Location">
+                        <field name="x_location" widget="text"/>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

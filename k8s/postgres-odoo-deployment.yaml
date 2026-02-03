@@ -1,0 +1,109 @@
+# Nekazari Odoo ERP Module - PostgreSQL for Odoo
+#
+# Dedicated PostgreSQL instance for Odoo databases.
+# Multi-DB: One database per tenant (nkz_odoo_{tenant_id})
+#
+# Author: Kate Benetis <kate@robotika.cloud>
+# Company: Robotika
+# License: AGPL-3.0
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres-odoo
+  namespace: nekazari
+  labels:
+    app: postgres-odoo
+    module: odoo-erp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres-odoo
+  template:
+    metadata:
+      labels:
+        app: postgres-odoo
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:15-alpine
+          ports:
+            - name: postgres
+              containerPort: 5432
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: odoo-db-secret
+                  key: username
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: odoo-db-secret
+                  key: password
+            - name: POSTGRES_DB
+              value: "postgres"
+            - name: PGDATA
+              value: "/var/lib/postgresql/data/pgdata"
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "100m"
+            limits:
+              memory: "1Gi"
+              cpu: "500m"
+          volumeMounts:
+            - name: postgres-data
+              mountPath: /var/lib/postgresql/data
+          livenessProbe:
+            exec:
+              command:
+                - pg_isready
+                - -U
+                - odoo
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            exec:
+              command:
+                - pg_isready
+                - -U
+                - odoo
+            initialDelaySeconds: 5
+            periodSeconds: 5
+      volumes:
+        - name: postgres-data
+          persistentVolumeClaim:
+            claimName: postgres-odoo-pvc
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-odoo-service
+  namespace: nekazari
+  labels:
+    app: postgres-odoo
+spec:
+  selector:
+    app: postgres-odoo
+  ports:
+    - name: postgres
+      port: 5432
+      targetPort: postgres
+  type: ClusterIP
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-odoo-pvc
+  namespace: nekazari
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi
+  storageClassName: standard

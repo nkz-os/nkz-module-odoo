@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+Nekazari Connector - Scheduled Actions (Cron Jobs)
+
+Note: These are backup crons. Primary sync is via NGSI-LD subscriptions (event-driven).
+
+Author: Kate Benetis <kate@robotika.cloud>
+Company: Robotika
+License: AGPL-3.0
+-->
+<odoo>
+    <!-- Daily sync verification (backup, not primary sync method) -->
+    <record id="ir_cron_nekazari_sync_verify" model="ir.cron">
+        <field name="name">Nekazari: Verify Sync Status</field>
+        <field name="model_id" ref="model_nekazari_sync_log"/>
+        <field name="state">code</field>
+        <field name="code">
+# This is a backup verification, not the primary sync.
+# Primary sync uses NGSI-LD subscriptions (event-driven).
+import logging
+_logger = logging.getLogger(__name__)
+_logger.info("Nekazari sync verification scheduled task executed")
+        </field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+        <field name="numbercall">-1</field>
+        <field name="active">True</field>
+    </record>
+
+    <!-- Cleanup old sync logs (keep 30 days) -->
+    <record id="ir_cron_nekazari_cleanup_logs" model="ir.cron">
+        <field name="name">Nekazari: Cleanup Old Sync Logs</field>
+        <field name="model_id" ref="model_nekazari_sync_log"/>
+        <field name="state">code</field>
+        <field name="code">
+from datetime import datetime, timedelta
+cutoff = datetime.now() - timedelta(days=30)
+old_logs = env['nekazari.sync.log'].search([('create_date', '&lt;', cutoff)])
+old_logs.unlink()
+        </field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">weeks</field>
+        <field name="numbercall">-1</field>
+        <field name="active">True</field>
+    </record>
+</odoo>

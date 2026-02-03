@@ -1,0 +1,104 @@
+# Nekazari Odoo ERP Module - Docker Compose
+#
+# Local development environment.
+#
+# Author: Kate Benetis <kate@robotika.cloud>
+# Company: Robotika
+# License: AGPL-3.0
+
+version: '3.8'
+
+services:
+  # PostgreSQL for Odoo
+  postgres-odoo:
+    image: postgres:15-alpine
+    container_name: nkz-odoo-postgres
+    environment:
+      POSTGRES_USER: odoo
+      POSTGRES_PASSWORD: odoo_dev_password
+      POSTGRES_DB: postgres
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_odoo_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U odoo"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Odoo 16.0
+  odoo:
+    build:
+      context: ./odoo
+      dockerfile: Dockerfile
+    container_name: nkz-odoo
+    depends_on:
+      postgres-odoo:
+        condition: service_healthy
+    environment:
+      - DB_HOST=postgres-odoo
+      - DB_PORT=5432
+      - DB_USER=odoo
+      - DB_PASSWORD=odoo_dev_password
+      - ODOO_MASTER_PASSWORD=admin
+      - ODOO_TEMPLATE_DB=nkz_odoo_template
+    ports:
+      - "8069:8069"
+      - "8072:8072"
+    volumes:
+      - odoo_data:/var/lib/odoo
+      - ./odoo/addons/nekazari_connector:/mnt/extra-addons/nekazari_connector
+
+  # Backend API
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: nkz-odoo-backend
+    depends_on:
+      - odoo
+    environment:
+      - DEBUG=true
+      - DATABASE_URL=postgresql://postgres:postgres@host.docker.internal:5432/nekazari
+      - ODOO_HOST=odoo
+      - ODOO_PORT=8069
+      - ODOO_MASTER_PASSWORD=admin
+      - ODOO_TEMPLATE_DB=nkz_odoo_template
+      - ODOO_DB_HOST=postgres-odoo
+      - ODOO_DB_PORT=5432
+      - ODOO_DB_USER=odoo
+      - ODOO_DB_PASSWORD=odoo_dev_password
+      - REDIS_URL=redis://host.docker.internal:6379/0
+      - KEYCLOAK_URL=https://auth.artotxiki.com/auth
+      - KEYCLOAK_REALM=nekazari
+      - ORION_URL=http://host.docker.internal:1026
+      - N8N_URL=http://host.docker.internal:5678
+      - INTELLIGENCE_API_URL=http://host.docker.internal:8000
+    ports:
+      - "8001:8000"
+    volumes:
+      - ./backend/app:/app/app
+
+  # Frontend (dev server)
+  frontend:
+    image: node:20-alpine
+    container_name: nkz-odoo-frontend
+    working_dir: /app
+    command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
+    ports:
+      - "5010:5010"
+    volumes:
+      - ./:/app
+      - node_modules:/app/node_modules
+    environment:
+      - NODE_ENV=development
+
+volumes:
+  postgres_odoo_data:
+  odoo_data:
+  node_modules:
+
+networks:
+  default:
+    name: nkz-odoo-network

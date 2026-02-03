@@ -1,0 +1,140 @@
+{
+  "id": "odoo-erp",
+  "name": "odoo-erp",
+  "display_name": "Odoo ERP Integration",
+  "version": "1.0.0",
+  "description": "Multitenant Odoo ERP integration for farm and energy community management. Includes Som Comunitats modules for solar installations and energy self-consumption projects.",
+  "category": "integration",
+  "module_type": "ADDON_PAID",
+  "required_plan_type": "premium",
+  "pricing_tier": "PAID",
+
+  "author": {
+    "name": "Kate Benetis",
+    "email": "kate@robotika.cloud",
+    "company": "Robotika",
+    "website": "https://robotika.cloud"
+  },
+
+  "icon": "building-2",
+  "icon_url": "/modules/odoo-erp/assets/icon.png",
+  "company_logo_url": "/modules/odoo-erp/assets/robotika-logo.png",
+
+  "route_path": "/odoo",
+  "label": "Odoo ERP",
+  "navigation": {
+    "enabled": true,
+    "priority": 30,
+    "section": "management"
+  },
+
+  "required_roles": ["TenantAdmin", "PlatformAdmin", "Manager"],
+
+  "dependencies": {
+    "sdk_version": "^1.0.0",
+    "react_version": "^18.3.1",
+    "platform_version": "^2.0.0"
+  },
+
+  "permissions": {
+    "api_access": [
+      "/api/odoo/*",
+      "/api/odoo/tenant/*",
+      "/api/odoo/sync/*",
+      "/api/odoo/webhook/*"
+    ],
+    "storage_access": true,
+    "external_requests": [
+      "odoo.nkz.artotxiki.com",
+      "*.odoo.nkz.artotxiki.com"
+    ]
+  },
+
+  "build_config": {
+    "type": "remote",
+    "remote_entry_url": "/modules/odoo-erp/assets/remoteEntry.js",
+    "scope": "odoo_erp_module",
+    "exposed_module": "./App"
+  },
+
+  "slots": {
+    "layer-toggle": [],
+    "context-panel": [
+      {
+        "id": "odoo-entity-link",
+        "component": "OdooEntityLink",
+        "priority": 60,
+        "showWhen": {
+          "entityType": ["AgriParcel", "Device", "Building"]
+        }
+      }
+    ],
+    "bottom-panel": [],
+    "entity-tree": [
+      {
+        "id": "odoo-quick-actions",
+        "component": "OdooQuickActions",
+        "priority": 50
+      }
+    ],
+    "map-layer": []
+  },
+
+  "integrations": {
+    "n8n": {
+      "enabled": true,
+      "webhooks": [
+        "odoo.invoice.created",
+        "odoo.order.confirmed",
+        "odoo.energy.production"
+      ]
+    },
+    "intelligence": {
+      "enabled": true,
+      "features": [
+        "yield_prediction_to_odoo",
+        "energy_forecast_to_odoo"
+      ]
+    },
+    "ngsi_ld": {
+      "enabled": true,
+      "subscriptions": [
+        "AgriParcel",
+        "Device",
+        "Building",
+        "EnergyMeter"
+      ]
+    }
+  },
+
+  "odoo_config": {
+    "version": "16.0",
+    "multitenancy": "multi-db",
+    "energy_modules": [
+      "energy_community",
+      "energy_selfconsumption",
+      "energy_import_statement"
+    ]
+  },
+
+  "metadata": {
+    "icon": "🏢",
+    "color": "#714B67",
+    "features": [
+      "Multitenant Odoo ERP (one DB per tenant)",
+      "Farm management (products, parcels, harvests)",
+      "Solar installation management",
+      "Energy self-consumption tracking",
+      "Invoicing and accounting",
+      "CRM and inventory",
+      "N8N workflow automation",
+      "AI-powered predictions integration"
+    ],
+    "screenshots": [
+      "assets/screenshot-dashboard.png",
+      "assets/screenshot-energy.png",
+      "assets/screenshot-farm.png"
+    ],
+    "documentation_url": "https://docs.nekazari.com/modules/odoo-erp"
+  }
+}

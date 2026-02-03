@@ -1,0 +1,75 @@
+# Nekazari Odoo ERP Module - ConfigMaps
+#
+# Non-sensitive configuration.
+#
+# Author: Kate Benetis <kate@robotika.cloud>
+# Company: Robotika
+# License: AGPL-3.0
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: odoo-config
+  namespace: nekazari
+  labels:
+    app: odoo
+    module: odoo-erp
+data:
+  # Odoo settings
+  ODOO_TEMPLATE_DB: "nkz_odoo_template"
+
+  # Service URLs
+  ORION_URL: "http://orion-ld-service:1026"
+  N8N_URL: "http://n8n-service:5678"
+  INTELLIGENCE_API_URL: "http://intelligence-api-service:8000"
+  REDIS_URL: "redis://redis-service:6379/0"
+
+  # Keycloak
+  KEYCLOAK_URL: "https://auth.artotxiki.com/auth"
+  KEYCLOAK_REALM: "nekazari"
+  KEYCLOAK_CLIENT_ID: "nekazari-api"
+
+  # CORS
+  ALLOWED_ORIGINS: "https://nekazari.artotxiki.com,https://*.odoo.nkz.artotxiki.com"
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: odoo-nginx-config
+  namespace: nekazari
+  labels:
+    app: odoo-frontend
+    module: odoo-erp
+data:
+  nginx.conf: |
+    server {
+        listen 80;
+        server_name _;
+
+        root /usr/share/nginx/html;
+        index index.html;
+
+        # Health check
+        location /health {
+            access_log off;
+            return 200 "healthy\n";
+            add_header Content-Type text/plain;
+        }
+
+        # Static files
+        location / {
+            try_files $uri $uri/ /index.html;
+        }
+
+        # Cache static assets
+        location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2)$ {
+            expires 1y;
+            add_header Cache-Control "public, immutable";
+        }
+
+        # Security headers
+        add_header X-Frame-Options "SAMEORIGIN" always;
+        add_header X-Content-Type-Options "nosniff" always;
+        add_header X-XSS-Protection "1; mode=block" always;
+    }
