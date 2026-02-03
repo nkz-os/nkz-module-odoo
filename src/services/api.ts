@@ -105,35 +105,57 @@ class OdooApiClient {
   }
 
   private getToken(): string | null {
-    // Get token from Nekazari host auth context
-    // The host exposes authentication via window.__nekazariAuthContext
+    if (typeof window === 'undefined') return null;
+
+    // 1. Try Keycloak instance (same as working vegetation-health module)
+    const keycloakInstance = (window as any).keycloak;
+    if (keycloakInstance?.token) {
+      return keycloakInstance.token;
+    }
+
+    // 2. Try __nekazariAuthContext
     const authContext = (window as any).__nekazariAuthContext;
-    
     if (authContext) {
-      // Try getToken() method first, then direct token property
       const token = typeof authContext.getToken === 'function' 
         ? authContext.getToken() 
         : authContext.token;
       if (token) return token;
     }
-    
-    // Fallback to localStorage for standalone testing
-    return localStorage.getItem('nkz_token');
+
+    // 3. Fallback to localStorage
+    return localStorage.getItem('nkz_token') || localStorage.getItem('auth_token');
   }
 
   private getTenantId(): string | null {
-    // Get tenant ID from Nekazari host auth context
+    if (typeof window === 'undefined') return null;
+
+    // 1. Try __nekazariAuthContext
     const authContext = (window as any).__nekazariAuthContext;
-    
-    if (authContext) {
-      // Try getTenantId() method first, then direct tenantId property
-      const tenantId = typeof authContext.getTenantId === 'function'
-        ? authContext.getTenantId()
-        : authContext.tenantId;
-      if (tenantId) return tenantId;
+    if (authContext?.tenantId) {
+      return authContext.tenantId;
     }
-    
-    // Fallback to localStorage for standalone testing
+
+    // 2. Try to extract from token
+    const token = this.getToken();
+    if (token) {
+      try {
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(
+          window.atob(base64)
+            .split('')
+            .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+            .join('')
+        );
+        const decoded = JSON.parse(jsonPayload);
+        const tenantId = decoded['tenant-id'] || decoded.tenant_id || decoded.tenantId || decoded.tenant;
+        if (tenantId) return tenantId;
+      } catch (e) {
+        console.warn('[OdooApi] Failed to decode token for tenant', e);
+      }
+    }
+
+    // 3. Fallback to localStorage
     return localStorage.getItem('nkz_tenant_id');
   }
 
