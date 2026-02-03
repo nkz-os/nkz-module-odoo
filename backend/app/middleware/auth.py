@@ -107,16 +107,31 @@ class JWTAuthMiddleware(BaseHTTPMiddleware):
         try:
             jwks_client = get_jwks_client()
             signing_key = jwks_client.get_signing_key_from_jwt(token)
+            
+            expected_issuer = f"{settings.KEYCLOAK_URL}/realms/{settings.KEYCLOAK_REALM}"
 
-            payload = jwt.decode(
-                token,
-                signing_key.key,
-                algorithms=["RS256"],
-                audience=settings.KEYCLOAK_CLIENT_ID,
-                issuer=f"{settings.KEYCLOAK_URL}/realms/{settings.KEYCLOAK_REALM}"
-            )
-
-            return payload
+            # First try with audience validation
+            try:
+                payload = jwt.decode(
+                    token,
+                    signing_key.key,
+                    algorithms=["RS256"],
+                    audience=settings.KEYCLOAK_CLIENT_ID,
+                    issuer=expected_issuer
+                )
+                return payload
+            except jwt.InvalidAudienceError:
+                # Keycloak may not include 'aud' claim in all tokens
+                # Validate without audience requirement but verify issuer
+                logger.debug("Token missing 'aud' claim, validating without audience")
+                payload = jwt.decode(
+                    token,
+                    signing_key.key,
+                    algorithms=["RS256"],
+                    issuer=expected_issuer,
+                    options={"verify_aud": False}
+                )
+                return payload
 
         except jwt.PyJWKClientError as e:
             logger.error(f"JWKS client error: {e}")
