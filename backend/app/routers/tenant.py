@@ -220,7 +220,11 @@ async def delete_tenant_odoo(
 
 
 def _build_tenant_odoo_url(tenant_id: str) -> str:
-    """Build the Odoo URL for a tenant using subdomain pattern."""
-    # In production, this would be: https://{tenant_id}.odoo.nkz.artotxiki.com
-    # With dbfilter, Odoo will auto-select the correct database
-    return f"https://{tenant_id}.odoo.nkz.artotxiki.com"
+    """Build the Odoo URL for a tenant.
+    
+    Uses the shared Odoo instance with database selection.
+    The database name follows the pattern: nkz_odoo_{tenant_id}
+    """
+    # Use the main Odoo URL with db parameter for database selection
+    db_name = f"nkz_odoo_{tenant_id}"
+    return f"https://odoo.nkz.artotxiki.com/web?db={db_name}"
