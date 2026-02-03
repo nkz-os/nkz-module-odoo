@@ -34,66 +34,78 @@ async def get_pool() -> asyncpg.Pool:
 
 
 async def init_db():
-    """Initialize database tables for the Odoo module."""
+    """Initialize database tables for the Odoo module.
+    
+    This function is idempotent and handles race conditions from multiple
+    pods starting simultaneously.
+    """
     pool = await get_pool()
 
     async with pool.acquire() as conn:
-        # Create tables for tenant Odoo info
-        await conn.execute("""
-            CREATE TABLE IF NOT EXISTS odoo_tenant_info (
-                tenant_id VARCHAR(255) PRIMARY KEY,
-                name VARCHAR(255),
-                database VARCHAR(255),
-                status VARCHAR(50) DEFAULT 'pending',
-                energy_modules_enabled BOOLEAN DEFAULT FALSE,
-                installed_modules JSONB DEFAULT '[]'::jsonb,
-                admin_email VARCHAR(255),
-                created_at TIMESTAMP WITH TIME ZONE,
-                updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-                error TEXT
-            )
-        """)
+        try:
+            # Create tables for tenant Odoo info
+            await conn.execute("""
+                CREATE TABLE IF NOT EXISTS odoo_tenant_info (
+                    tenant_id VARCHAR(255) PRIMARY KEY,
+                    name VARCHAR(255),
+                    database VARCHAR(255),
+                    status VARCHAR(50) DEFAULT 'pending',
+                    energy_modules_enabled BOOLEAN DEFAULT FALSE,
+                    installed_modules JSONB DEFAULT '[]'::jsonb,
+                    admin_email VARCHAR(255),
+                    created_at TIMESTAMP WITH TIME ZONE,
+                    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+                    error TEXT
+                )
+            """)
 
-        # Create tables for entity mappings
-        await conn.execute("""
-            CREATE TABLE IF NOT EXISTS odoo_entity_mappings (
-                id SERIAL PRIMARY KEY,
-                tenant_id VARCHAR(255) NOT NULL,
-                ngsi_id VARCHAR(512) NOT NULL,
-                ngsi_type VARCHAR(255) NOT NULL,
-                odoo_id INTEGER NOT NULL,
-                odoo_model VARCHAR(255) NOT NULL,
-                odoo_name VARCHAR(512),
-                last_sync TIMESTAMP WITH TIME ZONE,
-                created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-                UNIQUE(tenant_id, ngsi_id)
-            )
-        """)
+            # Create tables for entity mappings
+            await conn.execute("""
+                CREATE TABLE IF NOT EXISTS odoo_entity_mappings (
+                    id SERIAL PRIMARY KEY,
+                    tenant_id VARCHAR(255) NOT NULL,
+                    ngsi_id VARCHAR(512) NOT NULL,
+                    ngsi_type VARCHAR(255) NOT NULL,
+                    odoo_id INTEGER NOT NULL,
+                    odoo_model VARCHAR(255) NOT NULL,
+                    odoo_name VARCHAR(512),
+                    last_sync TIMESTAMP WITH TIME ZONE,
+                    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+                    UNIQUE(tenant_id, ngsi_id)
+                )
+            """)
 
-        # Create table for sync status
-        await conn.execute("""
-            CREATE TABLE IF NOT EXISTS odoo_sync_status (
-                tenant_id VARCHAR(255) PRIMARY KEY,
-                status VARCHAR(50) DEFAULT 'never_synced',
-                last_sync TIMESTAMP WITH TIME ZONE,
-                entities_synced INTEGER DEFAULT 0,
-                errors JSONB DEFAULT '[]'::jsonb,
-                updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-            )
-        """)
+            # Create table for sync status
+            await conn.execute("""
+                CREATE TABLE IF NOT EXISTS odoo_sync_status (
+                    tenant_id VARCHAR(255) PRIMARY KEY,
+                    status VARCHAR(50) DEFAULT 'never_synced',
+                    last_sync TIMESTAMP WITH TIME ZONE,
+                    entities_synced INTEGER DEFAULT 0,
+                    errors JSONB DEFAULT '[]'::jsonb,
+                    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+                )
+            """)
 
-        # Create indexes
-        await conn.execute("""
-            CREATE INDEX IF NOT EXISTS idx_odoo_mappings_tenant
-            ON odoo_entity_mappings(tenant_id)
-        """)
+            # Create indexes
+            await conn.execute("""
+                CREATE INDEX IF NOT EXISTS idx_odoo_mappings_tenant
+                ON odoo_entity_mappings(tenant_id)
+            """)
 
-        await conn.execute("""
-            CREATE INDEX IF NOT EXISTS idx_odoo_mappings_ngsi_id
-            ON odoo_entity_mappings(ngsi_id)
-        """)
+            await conn.execute("""
+                CREATE INDEX IF NOT EXISTS idx_odoo_mappings_ngsi_id
+                ON odoo_entity_mappings(ngsi_id)
+            """)
 
-        logger.info("Database tables initialized")
+            logger.info("Database tables initialized")
+
+        except asyncpg.exceptions.UniqueViolationError:
+            # Race condition: another pod already created the tables
+            logger.info("Database tables already exist (created by another instance)")
+        except asyncpg.exceptions.DuplicateTableError:
+            # Tables already exist
+            logger.info("Database tables already exist")
 
 
 # Tenant Info Operations
