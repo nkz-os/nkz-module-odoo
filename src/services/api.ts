@@ -105,14 +105,36 @@ class OdooApiClient {
   }
 
   private getToken(): string | null {
-    // Get token from global context injected by Nekazari host
-    const auth = (window as any).__nekazariAuth;
-    return auth?.token || localStorage.getItem('nkz_token');
+    // Get token from Nekazari host auth context
+    // The host exposes authentication via window.__nekazariAuthContext
+    const authContext = (window as any).__nekazariAuthContext;
+    
+    if (authContext) {
+      // Try getToken() method first, then direct token property
+      const token = typeof authContext.getToken === 'function' 
+        ? authContext.getToken() 
+        : authContext.token;
+      if (token) return token;
+    }
+    
+    // Fallback to localStorage for standalone testing
+    return localStorage.getItem('nkz_token');
   }
 
   private getTenantId(): string | null {
-    const tenant = (window as any).__nekazariTenant;
-    return tenant?.id || localStorage.getItem('nkz_tenant_id');
+    // Get tenant ID from Nekazari host auth context
+    const authContext = (window as any).__nekazariAuthContext;
+    
+    if (authContext) {
+      // Try getTenantId() method first, then direct tenantId property
+      const tenantId = typeof authContext.getTenantId === 'function'
+        ? authContext.getTenantId()
+        : authContext.tenantId;
+      if (tenantId) return tenantId;
+    }
+    
+    // Fallback to localStorage for standalone testing
+    return localStorage.getItem('nkz_tenant_id');
   }
 
   private async request<T>(
