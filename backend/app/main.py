@@ -68,17 +68,20 @@ app = FastAPI(
     redoc_url="/redoc" if settings.DEBUG else None
 )
 
-# CORS Middleware
+# JWT Auth Middleware (validates tokens from Keycloak)
+# Added FIRST so it runs AFTER CORS (middleware stack is LIFO)
+app.add_middleware(JWTAuthMiddleware)
+
+# CORS Middleware - Added LAST so it processes ALL responses (including auth errors)
+# This ensures CORS headers are added to 401/403 responses
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
-    allow_headers=["*"]
+    allow_headers=["*"],
+    expose_headers=["*"]
 )
-
-# JWT Auth Middleware (validates tokens from Keycloak)
-app.add_middleware(JWTAuthMiddleware)
 
 # Include routers
 app.include_router(health.router, prefix="/api/odoo", tags=["Health"])
