@@ -47,13 +47,61 @@ class OdooApiClient {
   private baseUrl: string;
 
   constructor() {
-    // In production, use the absolute API URL
-    // In development, use proxy
-    if (typeof window !== 'undefined' && window.location.hostname === 'nekazari.artotxiki.com') {
-      this.baseUrl = 'https://nkz.artotxiki.com/api/odoo';
-    } else {
-      this.baseUrl = '/api/odoo';
+    this.baseUrl = this.resolveApiUrl();
+  }
+
+  /**
+   * Resolve the API URL in a portable way.
+   * Priority:
+   * 1. Host-injected config (window.__nekazariConfig.apiUrl)
+   * 2. Environment variable (import.meta.env.VITE_API_URL)
+   * 3. Dynamic detection based on current domain
+   * 4. Fallback to relative path (for local development with proxy)
+   */
+  private resolveApiUrl(): string {
+    if (typeof window === 'undefined') {
+      return '/api/odoo';
     }
+
+    // 1. Check host-injected config
+    const config = (window as any).__nekazariConfig;
+    if (config?.apiUrl) {
+      return `${config.apiUrl}/api/odoo`;
+    }
+
+    // 2. Check environment variable
+    const envApiUrl = (import.meta as any).env?.VITE_API_URL;
+    if (envApiUrl) {
+      return `${envApiUrl}/api/odoo`;
+    }
+
+    // 3. Dynamic detection: if on a "frontend" domain, derive API domain
+    const hostname = window.location.hostname;
+    
+    // Pattern: frontend at "app.domain.com" or "nekazari.domain.com" → API at "api.domain.com" or "nkz.domain.com"
+    // This handles common patterns without hardcoding specific domains
+    if (hostname !== 'localhost' && !hostname.startsWith('127.') && !hostname.startsWith('192.168.')) {
+      // Extract the base domain (e.g., "artotxiki.com" from "nekazari.artotxiki.com")
+      const parts = hostname.split('.');
+      if (parts.length >= 2) {
+        const baseDomain = parts.slice(-2).join('.');
+        const subdomain = parts.slice(0, -2).join('.');
+        
+        // Common frontend → API subdomain mappings
+        const apiSubdomainMap: Record<string, string> = {
+          'nekazari': 'nkz',
+          'app': 'api',
+          'www': 'api',
+          'frontend': 'api'
+        };
+        
+        const apiSubdomain = apiSubdomainMap[subdomain] || 'api';
+        return `https://${apiSubdomain}.${baseDomain}/api/odoo`;
+      }
+    }
+
+    // 4. Fallback: relative path (works with dev proxy)
+    return '/api/odoo';
   }
 
   private getToken(): string | null {
