@@ -114,4 +114,4 @@ spec:
   tls:
     - hosts:
         - odoo.nkz.artotxiki.com
-      secretName: odoo-tls
+      secretName: nkz-tls  # Use wildcard cert for *.nkz.artotxiki.com
