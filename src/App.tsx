@@ -25,7 +25,8 @@ import './index.css';
 type TabType = 'erp' | 'energy' | 'farm' | 'settings';
 
 const OdooContent: React.FC = () => {
-  const { tenantInfo, isLoading, error, refreshTenant } = useOdoo();
+  const { tenantInfo, isLoading, error, refreshTenant, provisionOdoo } = useOdoo();
+  const [isProvisioning, setIsProvisioning] = useState(false);
   const [activeTab, setActiveTab] = useState<TabType>('erp');
   const [iframeLoaded, setIframeLoaded] = useState(false);
 
@@ -64,11 +65,41 @@ const OdooContent: React.FC = () => {
   }
 
   if (!tenantInfo) {
+    const handleProvision = async () => {
+      setIsProvisioning(true);
+      try {
+        await provisionOdoo();
+      } finally {
+        setIsProvisioning(false);
+      }
+    };
+
     return (
-      <div className="odoo-error">
-        <h2>Odoo Not Provisioned</h2>
-        <p>Your tenant does not have an Odoo instance yet.</p>
-        <p>Please contact your administrator to provision Odoo for your organization.</p>
+      <div className="odoo-provision">
+        <Building2 size={64} style={{ marginBottom: '1.5rem', opacity: 0.6 }} />
+        <h2>Odoo ERP Not Configured</h2>
+        <p>Your organization does not have an Odoo instance yet.</p>
+        <p style={{ fontSize: '0.9rem', opacity: 0.8, marginBottom: '1.5rem' }}>
+          Click below to provision your dedicated Odoo ERP with farm management, 
+          energy community modules, and NGSI-LD synchronization.
+        </p>
+        <button 
+          className="odoo-btn odoo-btn-primary"
+          onClick={handleProvision}
+          disabled={isProvisioning}
+        >
+          {isProvisioning ? (
+            <>
+              <RefreshCw size={16} className="animate-spin" style={{ marginRight: '0.5rem' }} />
+              Provisioning...
+            </>
+          ) : (
+            <>
+              <Settings size={16} style={{ marginRight: '0.5rem' }} />
+              Provision Odoo ERP
+            </>
+          )}
+        </button>
       </div>
     );
   }
