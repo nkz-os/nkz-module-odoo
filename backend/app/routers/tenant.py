@@ -222,9 +222,9 @@ async def delete_tenant_odoo(
 def _build_tenant_odoo_url(tenant_id: str) -> str:
     """Build the Odoo URL for a tenant.
     
-    Uses the shared Odoo instance with database selection.
+    Uses the shared Odoo instance at /odoo path with database selection.
     The database name follows the pattern: nkz_odoo_{tenant_id}
     """
     db_name = f"nkz_odoo_{tenant_id}"
-    # Direct URL with database pre-selected
-    return f"https://odoo.nkz.artotxiki.com/web?db={db_name}"
+    # Use /odoo path on main domain - Odoo has web.base.url configured for this
+    return f"https://nkz.artotxiki.com/odoo/web?db={db_name}"
