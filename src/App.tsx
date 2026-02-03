@@ -17,14 +17,33 @@
  * @license AGPL-3.0
  */
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Building2, Sun, Leaf, RefreshCw, ExternalLink, Settings } from 'lucide-react';
 import { OdooProvider, useOdoo } from './services/context';
 import './index.css';
 
+type TabType = 'dashboard' | 'sales' | 'inventory' | 'accounting';
+
 const OdooContent: React.FC = () => {
   const { tenantInfo, isLoading, error, refreshTenant, provisionOdoo } = useOdoo();
   const [isProvisioning, setIsProvisioning] = useState(false);
+  const [activeTab, setActiveTab] = useState<TabType>('dashboard');
+  const [iframeLoaded, setIframeLoaded] = useState(false);
+  const [iframeError, setIframeError] = useState(false);
+
+  const getOdooUrl = useCallback(() => {
+    if (!tenantInfo?.odooUrl) return '';
+
+    // Map tabs to Odoo menu paths
+    const paths: Record<TabType, string> = {
+      dashboard: '',
+      sales: '#menu_id=sale.sale_menu_root',
+      inventory: '#menu_id=stock.menu_stock_root',
+      accounting: '#menu_id=account.menu_finance'
+    };
+
+    return `${tenantInfo.odooUrl}${paths[activeTab]}`;
+  }, [tenantInfo, activeTab]);
 
   if (isLoading) {
     return (
@@ -97,65 +116,81 @@ const OdooContent: React.FC = () => {
     );
   }
 
-  const openOdooTab = (path: string = '') => {
-    if (tenantInfo?.odooUrl) {
-      window.open(tenantInfo.odooUrl + path, '_blank');
-    }
+  const handleIframeLoad = () => {
+    setIframeLoaded(true);
+    setIframeError(false);
+  };
+
+  const handleIframeError = () => {
+    setIframeError(true);
+    setIframeLoaded(true);
   };
 
   return (
     <div className="odoo-content">
-      <div className="odoo-dashboard">
-        <div className="odoo-info-card">
-          <h3>Your Odoo Instance</h3>
-          <div className="odoo-info-row">
-            <span className="odoo-info-label">Database:</span>
-            <span className="odoo-info-value">{tenantInfo.odooDatabase}</span>
-          </div>
-          <div className="odoo-info-row">
-            <span className="odoo-info-label">Status:</span>
-            <span className={`odoo-info-status ${tenantInfo.status}`}>{tenantInfo.status}</span>
-          </div>
-          <div className="odoo-info-row">
-            <span className="odoo-info-label">Energy Modules:</span>
-            <span className="odoo-info-value">{tenantInfo.energyModulesEnabled ? 'Enabled' : 'Disabled'}</span>
-          </div>
-        </div>
+      <nav className="odoo-nav">
+        <button
+          className={`odoo-nav-btn ${activeTab === 'dashboard' ? 'active' : ''}`}
+          onClick={() => { setActiveTab('dashboard'); setIframeLoaded(false); }}
+        >
+          <Building2 size={16} style={{ marginRight: '0.5rem' }} />
+          Dashboard
+        </button>
+        <button
+          className={`odoo-nav-btn ${activeTab === 'sales' ? 'active' : ''}`}
+          onClick={() => { setActiveTab('sales'); setIframeLoaded(false); }}
+        >
+          <Sun size={16} style={{ marginRight: '0.5rem' }} />
+          Sales
+        </button>
+        <button
+          className={`odoo-nav-btn ${activeTab === 'inventory' ? 'active' : ''}`}
+          onClick={() => { setActiveTab('inventory'); setIframeLoaded(false); }}
+        >
+          <Leaf size={16} style={{ marginRight: '0.5rem' }} />
+          Inventory
+        </button>
+        <button
+          className={`odoo-nav-btn ${activeTab === 'accounting' ? 'active' : ''}`}
+          onClick={() => { setActiveTab('accounting'); setIframeLoaded(false); }}
+        >
+          <Settings size={16} style={{ marginRight: '0.5rem' }} />
+          Accounting
+        </button>
+      </nav>
 
-        <div className="odoo-quick-actions">
-          <h3>Quick Access</h3>
-          <div className="odoo-action-grid">
-            <button className="odoo-action-btn" onClick={() => openOdooTab('')}>
-              <Building2 size={24} />
-              <span>ERP Dashboard</span>
-            </button>
-            <button className="odoo-action-btn" onClick={() => openOdooTab('#menu_id=sale.sale_menu_root')}>
-              <Sun size={24} />
-              <span>Sales</span>
-            </button>
-            <button className="odoo-action-btn" onClick={() => openOdooTab('#menu_id=stock.menu_stock_root')}>
-              <Leaf size={24} />
-              <span>Inventory</span>
-            </button>
-            <button className="odoo-action-btn" onClick={() => openOdooTab('#menu_id=account.menu_finance')}>
-              <Settings size={24} />
-              <span>Accounting</span>
-            </button>
+      <div className="odoo-iframe-container">
+        {!iframeLoaded && !iframeError && (
+          <div className="odoo-loading">
+            <div className="odoo-spinner" />
+            <p>Loading Odoo...</p>
           </div>
-        </div>
-
-        <div className="odoo-modules-card">
-          <h3>Installed Modules</h3>
-          <div className="odoo-modules-list">
-            {tenantInfo.installedModules.length > 0 ? (
-              tenantInfo.installedModules.map((mod, i) => (
-                <span key={i} className="odoo-module-tag">{mod}</span>
-              ))
-            ) : (
-              <span className="odoo-info-muted">Base modules installed</span>
-            )}
+        )}
+        {iframeError ? (
+          <div className="odoo-fallback">
+            <Building2 size={48} style={{ marginBottom: '1rem', opacity: 0.6 }} />
+            <p>Unable to load Odoo in embedded mode.</p>
+            <a 
+              href={tenantInfo.odooUrl} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="odoo-btn odoo-btn-primary"
+            >
+              <ExternalLink size={16} style={{ marginRight: '0.5rem' }} />
+              Open Odoo in New Tab
+            </a>
           </div>
-        </div>
+        ) : (
+          <iframe
+            className="odoo-iframe"
+            src={getOdooUrl()}
+            title="Odoo ERP"
+            onLoad={handleIframeLoad}
+            onError={handleIframeError}
+            style={{ display: iframeLoaded ? 'block' : 'none' }}
+            allow="fullscreen"
+          />
+        )}
       </div>
     </div>
   );

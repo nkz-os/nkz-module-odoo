@@ -312,6 +312,37 @@ body {
   font-size: 0.9rem;
 }
 
+/* Iframe container */
+.odoo-iframe-container {
+  flex: 1;
+  position: relative;
+  background: var(--odoo-bg);
+}
+
+.odoo-iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.odoo-fallback {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  text-align: center;
+  padding: 2rem;
+  color: var(--odoo-text-muted);
+}
+
+.odoo-fallback p {
+  margin-bottom: 1.5rem;
+}
+
 .odoo-card {
   background: var(--odoo-card-bg);
   border: 1px solid var(--odoo-border);

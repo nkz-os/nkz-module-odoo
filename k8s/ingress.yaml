@@ -84,20 +84,8 @@ spec:
       secretName: nekazari-tls
 
 ---
-# Middleware to strip /odoo prefix for Odoo direct access
-apiVersion: traefik.io/v1alpha1
-kind: Middleware
-metadata:
-  name: strip-odoo
-  namespace: nekazari
-spec:
-  stripPrefix:
-    prefixes:
-      - /odoo
-
----
-# Odoo direct access via nkz.artotxiki.com/odoo path
-# Uses existing nkz-tls certificate
+# Odoo direct access at odoo.nkz.artotxiki.com
+# Uses dedicated certificate for iframe embedding
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -107,16 +95,16 @@ metadata:
     app: odoo
     module: odoo-erp
   annotations:
-    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
     traefik.ingress.kubernetes.io/router.tls: "true"
-    traefik.ingress.kubernetes.io/router.middlewares: nekazari-strip-odoo@kubernetescrd
 spec:
   ingressClassName: traefik
   rules:
-    - host: nkz.artotxiki.com
+    - host: odoo.nkz.artotxiki.com
       http:
         paths:
-          - path: /odoo
+          - path: /
             pathType: Prefix
             backend:
               service:
@@ -125,5 +113,5 @@ spec:
                   number: 8069
   tls:
     - hosts:
-        - nkz.artotxiki.com
-      secretName: nkz-tls
+        - odoo.nkz.artotxiki.com
+      secretName: odoo-tls
