@@ -17,12 +17,14 @@ export PASSWORD="${DB_PASSWORD}"
 
 # Process odoo.conf to expand environment variables
 # Odoo doesn't natively support env vars in config files
+# Copy to /tmp and process there (writable directory)
 if [ -f /etc/odoo/odoo.conf ]; then
-    # Replace ${ODOO_MASTER_PASSWORD:-admin} with actual value
     MASTER_PWD="${ODOO_MASTER_PASSWORD:-admin}"
-    sed -i "s|\${ODOO_MASTER_PASSWORD:-admin}|${MASTER_PWD}|g" /etc/odoo/odoo.conf
-    sed -i "s|\$ODOO_MASTER_PASSWORD|${MASTER_PWD}|g" /etc/odoo/odoo.conf
-    echo "Configured admin_passwd in odoo.conf"
+    cp /etc/odoo/odoo.conf /tmp/odoo.conf
+    sed -i "s|\${ODOO_MASTER_PASSWORD:-admin}|${MASTER_PWD}|g" /tmp/odoo.conf
+    sed -i "s|\$ODOO_MASTER_PASSWORD|${MASTER_PWD}|g" /tmp/odoo.conf
+    export ODOO_RC=/tmp/odoo.conf
+    echo "Configured admin_passwd in /tmp/odoo.conf"
 fi
 
 # Wait for PostgreSQL to be ready
