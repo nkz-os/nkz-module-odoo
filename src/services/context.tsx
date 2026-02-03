@@ -55,8 +55,17 @@ export const OdooProvider: React.FC<OdooProviderProps> = ({ children }) => {
       }
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to connect to Odoo';
-      setError(message);
-      setTenantInfo(null);
+      
+      // If error is "not provisioned", don't treat as error - show provisioning screen
+      if (message.toLowerCase().includes('not provisioned') || 
+          message.toLowerCase().includes('not found') ||
+          message.includes('404')) {
+        setError(null);
+        setTenantInfo(null);
+      } else {
+        setError(message);
+        setTenantInfo(null);
+      }
     } finally {
       setIsLoading(false);
     }
