@@ -17,20 +17,10 @@
  * @license AGPL-3.0
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Building2, Sun, Leaf, RefreshCw, ExternalLink, Settings } from 'lucide-react';
 import { OdooProvider, useOdoo } from './services/context';
-import { odooApi } from './services/api';
 import './index.css';
-
-interface TenantInfo {
-  id: string;
-  name: string;
-  odooDatabase: string;
-  odooUrl: string;
-  status: 'active' | 'provisioning' | 'error';
-  lastSync: string | null;
-}
 
 type TabType = 'erp' | 'energy' | 'farm' | 'settings';
 

@@ -8,7 +8,6 @@
  * @license AGPL-3.0
  */
 
-import React from 'react';
 import { ModuleViewerSlots } from './types';
 import OdooEntityLink from '../components/slots/OdooEntityLink';
 import OdooQuickActions from '../components/slots/OdooQuickActions';
