@@ -30,13 +30,14 @@ if ! PGPASSWORD="${PASSWORD}" psql -h "${HOST}" -U "${USER}" -lqt | cut -d \| -f
 
     # Create template database with base modules
     # Note: We use --db-template=template1 to avoid circular reference
+    # Include auth_oauth for Keycloak SSO integration
     odoo --db_host="${HOST}" \
          --db_port="${DB_PORT:-5432}" \
          --db_user="${USER}" \
          --db_password="${PASSWORD}" \
          --db-template=template1 \
          -d "$TEMPLATE_DB" \
-         -i base,web,sale,purchase,stock,account,maintenance \
+         -i base,web,sale,purchase,stock,account,maintenance,auth_oauth \
          --stop-after-init \
          --without-demo=all
 
