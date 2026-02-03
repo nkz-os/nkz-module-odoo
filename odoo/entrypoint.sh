@@ -23,10 +23,12 @@ if ! PGPASSWORD="${DB_PASSWORD}" psql -h "${DB_HOST:-postgres-odoo-service}" -U 
     echo "Creating template database: $TEMPLATE_DB"
 
     # Create template database with base modules
+    # Note: We use --db-template=template1 to avoid circular reference
     odoo --db_host="${DB_HOST:-postgres-odoo-service}" \
          --db_port="${DB_PORT:-5432}" \
          --db_user="${DB_USER:-odoo}" \
          --db_password="${DB_PASSWORD}" \
+         --db-template=template1 \
          -d "$TEMPLATE_DB" \
          -i base,web,sale,purchase,stock,account,maintenance \
          --stop-after-init \
