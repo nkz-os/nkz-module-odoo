@@ -15,6 +15,16 @@ export HOST="${DB_HOST:-postgres-odoo-service}"
 export USER="${DB_USER:-odoo}"
 export PASSWORD="${DB_PASSWORD}"
 
+# Process odoo.conf to expand environment variables
+# Odoo doesn't natively support env vars in config files
+if [ -f /etc/odoo/odoo.conf ]; then
+    # Replace ${ODOO_MASTER_PASSWORD:-admin} with actual value
+    MASTER_PWD="${ODOO_MASTER_PASSWORD:-admin}"
+    sed -i "s|\${ODOO_MASTER_PASSWORD:-admin}|${MASTER_PWD}|g" /etc/odoo/odoo.conf
+    sed -i "s|\$ODOO_MASTER_PASSWORD|${MASTER_PWD}|g" /etc/odoo/odoo.conf
+    echo "Configured admin_passwd in odoo.conf"
+fi
+
 # Wait for PostgreSQL to be ready
 echo "Waiting for PostgreSQL..."
 while ! pg_isready -h "${HOST}" -p "${DB_PORT:-5432}" -U "${USER}" -q; do
