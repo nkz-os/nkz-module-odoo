@@ -114,53 +114,65 @@ const OdooContent: React.FC = () => {
     );
   }
 
+  const openOdooTab = (path: string = '') => {
+    if (tenantInfo?.odooUrl) {
+      window.open(tenantInfo.odooUrl + path, '_blank');
+    }
+  };
+
   return (
     <div className="odoo-content">
-      <nav className="odoo-nav">
-        <button
-          className={`odoo-nav-btn ${activeTab === 'erp' ? 'active' : ''}`}
-          onClick={() => setActiveTab('erp')}
-        >
-          <Building2 size={16} style={{ marginRight: '0.5rem' }} />
-          ERP Dashboard
-        </button>
-        <button
-          className={`odoo-nav-btn ${activeTab === 'energy' ? 'active' : ''}`}
-          onClick={() => setActiveTab('energy')}
-        >
-          <Sun size={16} style={{ marginRight: '0.5rem' }} />
-          Energy
-        </button>
-        <button
-          className={`odoo-nav-btn ${activeTab === 'farm' ? 'active' : ''}`}
-          onClick={() => setActiveTab('farm')}
-        >
-          <Leaf size={16} style={{ marginRight: '0.5rem' }} />
-          Farm
-        </button>
-        <button
-          className={`odoo-nav-btn ${activeTab === 'settings' ? 'active' : ''}`}
-          onClick={() => setActiveTab('settings')}
-        >
-          <Settings size={16} style={{ marginRight: '0.5rem' }} />
-          Settings
-        </button>
-      </nav>
-
-      <div className="odoo-iframe-container">
-        {!iframeLoaded && (
-          <div className="odoo-loading">
-            <div className="odoo-spinner" />
-            <p>Loading Odoo...</p>
+      <div className="odoo-dashboard">
+        <div className="odoo-info-card">
+          <h3>Your Odoo Instance</h3>
+          <div className="odoo-info-row">
+            <span className="odoo-info-label">Database:</span>
+            <span className="odoo-info-value">{tenantInfo.odooDatabase}</span>
           </div>
-        )}
-        <iframe
-          className="odoo-iframe"
-          src={getOdooUrl()}
-          title="Odoo ERP"
-          onLoad={() => setIframeLoaded(true)}
-          style={{ display: iframeLoaded ? 'block' : 'none' }}
-        />
+          <div className="odoo-info-row">
+            <span className="odoo-info-label">Status:</span>
+            <span className={`odoo-info-status ${tenantInfo.status}`}>{tenantInfo.status}</span>
+          </div>
+          <div className="odoo-info-row">
+            <span className="odoo-info-label">Energy Modules:</span>
+            <span className="odoo-info-value">{tenantInfo.energyModulesEnabled ? 'Enabled' : 'Disabled'}</span>
+          </div>
+        </div>
+
+        <div className="odoo-quick-actions">
+          <h3>Quick Access</h3>
+          <div className="odoo-action-grid">
+            <button className="odoo-action-btn" onClick={() => openOdooTab('')}>
+              <Building2 size={24} />
+              <span>ERP Dashboard</span>
+            </button>
+            <button className="odoo-action-btn" onClick={() => openOdooTab('#menu_id=sale.sale_menu_root')}>
+              <Sun size={24} />
+              <span>Sales</span>
+            </button>
+            <button className="odoo-action-btn" onClick={() => openOdooTab('#menu_id=stock.menu_stock_root')}>
+              <Leaf size={24} />
+              <span>Inventory</span>
+            </button>
+            <button className="odoo-action-btn" onClick={() => openOdooTab('#menu_id=account.menu_finance')}>
+              <Settings size={24} />
+              <span>Accounting</span>
+            </button>
+          </div>
+        </div>
+
+        <div className="odoo-modules-card">
+          <h3>Installed Modules</h3>
+          <div className="odoo-modules-list">
+            {tenantInfo.installedModules.length > 0 ? (
+              tenantInfo.installedModules.map((mod, i) => (
+                <span key={i} className="odoo-module-tag">{mod}</span>
+              ))
+            ) : (
+              <span className="odoo-info-muted">Base modules installed</span>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );

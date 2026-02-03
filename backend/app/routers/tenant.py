@@ -224,7 +224,10 @@ def _build_tenant_odoo_url(tenant_id: str) -> str:
     
     Uses the shared Odoo instance with database selection.
     The database name follows the pattern: nkz_odoo_{tenant_id}
+    
+    Note: Using /odoo prefix requires Odoo to be aware of it.
+    For now, we use the login URL which auto-selects the database.
     """
-    # Use the main nkz domain with /odoo path and db parameter
     db_name = f"nkz_odoo_{tenant_id}"
-    return f"https://nkz.artotxiki.com/odoo/web?db={db_name}"
+    # Use login URL with database pre-selected
+    return f"https://nkz.artotxiki.com/odoo/web/login?db={db_name}"

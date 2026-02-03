@@ -184,6 +184,134 @@ body {
   animation: spin 1s linear infinite;
 }
 
+/* Dashboard styles */
+.odoo-dashboard {
+  padding: 1.5rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.odoo-info-card,
+.odoo-quick-actions,
+.odoo-modules-card {
+  background: var(--odoo-card-bg);
+  border: 1px solid var(--odoo-border);
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.odoo-info-card h3,
+.odoo-quick-actions h3,
+.odoo-modules-card h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--odoo-primary);
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--odoo-border);
+}
+
+.odoo-info-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--odoo-border);
+}
+
+.odoo-info-row:last-child {
+  border-bottom: none;
+}
+
+.odoo-info-label {
+  color: var(--odoo-text-muted);
+  font-size: 0.9rem;
+}
+
+.odoo-info-value {
+  font-weight: 500;
+}
+
+.odoo-info-status {
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.odoo-info-status.active {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.odoo-info-status.error {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.odoo-info-status.provisioning {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.odoo-action-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+.odoo-action-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 1.25rem;
+  background: linear-gradient(135deg, var(--odoo-bg) 0%, #fff 100%);
+  border: 1px solid var(--odoo-border);
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: var(--odoo-text);
+}
+
+.odoo-action-btn:hover {
+  background: var(--odoo-primary);
+  color: white;
+  border-color: var(--odoo-primary);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(113, 75, 103, 0.2);
+}
+
+.odoo-action-btn span {
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.odoo-modules-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.odoo-module-tag {
+  background: var(--odoo-bg);
+  border: 1px solid var(--odoo-border);
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
+  font-size: 0.8rem;
+  color: var(--odoo-text-muted);
+}
+
+.odoo-info-muted {
+  color: var(--odoo-text-muted);
+  font-style: italic;
+  font-size: 0.9rem;
+}
+
 .odoo-card {
   background: var(--odoo-card-bg);
   border: 1px solid var(--odoo-border);
