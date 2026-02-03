@@ -250,6 +250,7 @@ async def get_sync_status(tenant_id: str) -> Optional[dict]:
 
 async def update_sync_status(tenant_id: str, status: dict):
     """Update sync status for a tenant."""
+    import json
     pool = await get_pool()
 
     async with pool.acquire() as conn:
@@ -268,5 +269,5 @@ async def update_sync_status(tenant_id: str, status: dict):
             status.get("status"),
             status.get("last_sync"),
             status.get("entities_synced", 0),
-            str(status.get("errors", []))
+            json.dumps(status.get("errors", []))  # Use json.dumps for valid JSON
         )
