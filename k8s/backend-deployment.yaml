@@ -16,7 +16,7 @@ metadata:
     module: odoo-erp
     nekazari.io/profile: addon
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: odoo-backend
