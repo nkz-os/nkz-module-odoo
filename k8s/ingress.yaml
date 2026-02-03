@@ -1,0 +1,83 @@
+# Nekazari Odoo ERP Module - Ingress Configuration
+#
+# Exposes the Odoo module frontend and backend via Traefik ingress.
+#
+# Author: Kate Benetis <kate@robotika.cloud>
+# Company: Robotika
+# License: AGPL-3.0
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: odoo-module-ingress
+  namespace: nekazari
+  labels:
+    app: odoo-frontend
+    module: odoo-erp
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+spec:
+  ingressClassName: traefik
+  rules:
+    # Frontend module (React UI)
+    - host: nekazari.artotxiki.com
+      http:
+        paths:
+          - path: /modules/odoo-erp
+            pathType: Prefix
+            backend:
+              service:
+                name: odoo-frontend-service
+                port:
+                  number: 80
+    # Backend API (orchestration layer)
+    - host: nkz.artotxiki.com
+      http:
+        paths:
+          - path: /api/odoo
+            pathType: Prefix
+            backend:
+              service:
+                name: odoo-backend-service
+                port:
+                  number: 80
+  tls:
+    - hosts:
+        - nekazari.artotxiki.com
+        - nkz.artotxiki.com
+      secretName: nekazari-tls
+
+---
+# Odoo direct access (optional - for iframe embedding)
+# Note: This exposes Odoo at odoo.nkz.artotxiki.com
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: odoo-direct-ingress
+  namespace: nekazari
+  labels:
+    app: odoo
+    module: odoo-erp
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: odoo.nkz.artotxiki.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: odoo-service
+                port:
+                  number: 8069
+  tls:
+    - hosts:
+        - odoo.nkz.artotxiki.com
+      secretName: odoo-tls
