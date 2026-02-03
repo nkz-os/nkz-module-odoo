@@ -79,7 +79,7 @@ async def trigger_sync(
 
         await update_sync_status(tenant_id, {
             "status": "synced",
-            "last_sync": datetime.utcnow().isoformat(),
+            "last_sync": datetime.utcnow(),  # Pass datetime object, not string
             "entities_synced": result["synced"],
             "errors": result["errors"]
         })
