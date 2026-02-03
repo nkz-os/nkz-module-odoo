@@ -6,6 +6,19 @@
 # Company: Robotika
 # License: AGPL-3.0
 
+---
+# Middleware to strip /modules/odoo-erp prefix
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: strip-odoo-erp
+  namespace: nekazari
+spec:
+  stripPrefix:
+    prefixes:
+      - /modules/odoo-erp
+
+---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -18,6 +31,7 @@ metadata:
     cert-manager.io/cluster-issuer: letsencrypt-prod
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
     traefik.ingress.kubernetes.io/router.tls: "true"
+    traefik.ingress.kubernetes.io/router.middlewares: nekazari-strip-odoo-erp@kubernetescrd
 spec:
   ingressClassName: traefik
   rules:
@@ -32,7 +46,28 @@ spec:
                 name: odoo-frontend-service
                 port:
                   number: 80
-    # Backend API (orchestration layer)
+  tls:
+    - hosts:
+        - nekazari.artotxiki.com
+      secretName: nekazari-tls
+
+---
+# Backend API ingress (no prefix stripping needed)
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: odoo-api-ingress
+  namespace: nekazari
+  labels:
+    app: odoo-backend
+    module: odoo-erp
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+spec:
+  ingressClassName: traefik
+  rules:
     - host: nkz.artotxiki.com
       http:
         paths:
@@ -45,7 +80,6 @@ spec:
                   number: 80
   tls:
     - hosts:
-        - nekazari.artotxiki.com
         - nkz.artotxiki.com
       secretName: nekazari-tls
 
