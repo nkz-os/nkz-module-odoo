@@ -44,7 +44,17 @@ export interface OdooStats {
 }
 
 class OdooApiClient {
-  private baseUrl: string = '/api/odoo';
+  private baseUrl: string;
+
+  constructor() {
+    // In production, use the absolute API URL
+    // In development, use proxy
+    if (typeof window !== 'undefined' && window.location.hostname === 'nekazari.artotxiki.com') {
+      this.baseUrl = 'https://nkz.artotxiki.com/api/odoo';
+    } else {
+      this.baseUrl = '/api/odoo';
+    }
+  }
 
   private getToken(): string | null {
     // Get token from global context injected by Nekazari host
