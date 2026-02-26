@@ -71,32 +71,57 @@ spec:
                   key: password
             # Redis
             - name: REDIS_URL
-              value: "redis://redis-service:6379/0"
-            # Keycloak
+              valueFrom:
+                configMapKeyRef:
+                  name: odoo-config
+                  key: REDIS_URL
+            # Keycloak, NGSI-LD, N8N, Intelligence, CORS (from ConfigMap; replace placeholders at deploy)
             - name: KEYCLOAK_URL
-              value: "https://auth.artotxiki.com/auth"
+              valueFrom:
+                configMapKeyRef:
+                  name: odoo-config
+                  key: KEYCLOAK_URL
             - name: KEYCLOAK_REALM
-              value: "nekazari"
+              valueFrom:
+                configMapKeyRef:
+                  name: odoo-config
+                  key: KEYCLOAK_REALM
             - name: KEYCLOAK_CLIENT_ID
-              value: "nekazari-api"
-            # NGSI-LD
+              valueFrom:
+                configMapKeyRef:
+                  name: odoo-config
+                  key: KEYCLOAK_CLIENT_ID
             - name: ORION_URL
-              value: "http://orion-ld-service:1026"
-            # N8N
+              valueFrom:
+                configMapKeyRef:
+                  name: odoo-config
+                  key: ORION_URL
             - name: N8N_URL
-              value: "http://n8n-service:5678"
+              valueFrom:
+                configMapKeyRef:
+                  name: odoo-config
+                  key: N8N_URL
             - name: N8N_WEBHOOK_SECRET
               valueFrom:
                 secretKeyRef:
                   name: odoo-secret
                   key: n8n-webhook-secret
                   optional: true
-            # Intelligence
             - name: INTELLIGENCE_API_URL
-              value: "http://intelligence-api-service:8000"
-            # CORS
+              valueFrom:
+                configMapKeyRef:
+                  name: odoo-config
+                  key: INTELLIGENCE_API_URL
             - name: ALLOWED_ORIGINS_STR
-              value: "https://nekazari.artotxiki.com,https://*.odoo.nkz.artotxiki.com"
+              valueFrom:
+                configMapKeyRef:
+                  name: odoo-config
+                  key: ALLOWED_ORIGINS_STR
+            - name: ODOO_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: odoo-config
+                  key: ODOO_URL
           resources:
             requests:
               memory: "256Mi"

@@ -31,6 +31,8 @@ class Settings(BaseSettings):
     ODOO_PORT: int = 8069
     ODOO_MASTER_PASSWORD: str = "admin"  # For database management
     ODOO_TEMPLATE_DB: str = "nkz_odoo_template"
+    # Public URL for Odoo (links returned to frontend). Empty = relative path /odoo (same origin).
+    ODOO_URL: str = ""
 
     # PostgreSQL for Odoo
     ODOO_DB_HOST: str = "postgres-odoo-service"
@@ -45,7 +47,7 @@ class Settings(BaseSettings):
     REDIS_URL: str = "redis://redis-service:6379/0"
 
     # Keycloak
-    KEYCLOAK_URL: str = "https://auth.artotxiki.com/auth"
+    KEYCLOAK_URL: str = "http://keycloak:8080/auth"
     KEYCLOAK_REALM: str = "nekazari"
     KEYCLOAK_CLIENT_ID: str = "nekazari-api"
     JWKS_URL: str = ""
@@ -61,7 +63,7 @@ class Settings(BaseSettings):
     INTELLIGENCE_API_URL: str = "http://intelligence-api-service:8000"
 
     # Allowed Origins for CORS (stored as comma-separated string)
-    ALLOWED_ORIGINS_STR: str = "https://nekazari.artotxiki.com,http://localhost:5010,http://localhost:5173"
+    ALLOWED_ORIGINS_STR: str = "http://localhost:5010,http://localhost:5173"
 
     @property
     def allowed_origins(self) -> list[str]:

@@ -42,9 +42,9 @@ INSERT INTO marketplace_modules (
     'odoo-erp',                                                                  -- Internal name
     'Odoo ERP Integration',                                                      -- Display name
     'Multitenant Odoo ERP integration for farm and energy community management. Includes Som Comunitats modules for solar installations and energy self-consumption projects.',
-    'https://nekazari.artotxiki.com/modules/odoo-erp/assets/remoteEntry.js',     -- Remote entry URL (public, via ingress)
-    'odoo_erp_module',                                                           -- Module Federation scope (must match vite.config.ts)
-    './App',                                                                     -- Exposed module path (must match vite.config.ts)
+    '/modules/odoo-erp/nkz-module.js',                                            -- Remote entry URL (IIFE bundle served from MinIO)
+    'odoo_erp_module',                                                           -- Scope (legacy; IIFE modules register via window.__NKZ__)
+    './App',                                                                     -- Exposed module path (legacy; IIFE modules use moduleEntry.ts)
     '1.0.0',                                                                     -- Version
     'Kate Benetis - Robotika',                                                   -- Author
     'integration',                                                               -- Category
@@ -106,14 +106,12 @@ INSERT INTO marketplace_modules (
 -- =============================================================================
 -- NOTES:
 -- =============================================================================
--- 1. REMOTE_ENTRY_URL: Must be the public URL accessible through ingress
---    Format: https://nekazari.artotxiki.com/modules/{module-id}/assets/remoteEntry.js
+-- 1. REMOTE_ENTRY_URL: Relative path to the IIFE bundle in MinIO
+--    Format: /modules/{module-id}/nkz-module.js
+--    Served via frontend-static (nginx proxy to MinIO)
 --
--- 2. SCOPE: Must match the 'name' field in vite.config.ts federation plugin
---    Current: 'odoo_erp_module'
---
--- 3. EXPOSED_MODULE: Must match the key in vite.config.ts federation exposes
---    Current: './App'
+-- 2. SCOPE / EXPOSED_MODULE: Legacy fields from Module Federation era.
+--    IIFE modules register via window.__NKZ__.register() in moduleEntry.ts.
 --
 -- 4. MODULE_TYPE: 
 --    - 'ADDON_FREE': Free for all tenants
@@ -121,7 +119,8 @@ INSERT INTO marketplace_modules (
 --    - 'ENTERPRISE': Enterprise-only features
 --
 -- 5. After registration, the Core Platform will:
---    - Load the module frontend via Module Federation from remote_entry_url
+--    - Load the module IIFE bundle via <script src="remote_entry_url">
+--    - The bundle self-registers via window.__NKZ__.register()
 --    - Display the module in the marketplace/admin panel
 --
 -- 6. To activate for a specific tenant:

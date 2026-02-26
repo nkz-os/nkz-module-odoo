@@ -44,17 +44,13 @@
       "/api/odoo/webhook/*"
     ],
     "storage_access": true,
-    "external_requests": [
-      "odoo.nkz.artotxiki.com",
-      "*.odoo.nkz.artotxiki.com"
-    ]
+    "external_requests": []
   },
+  "_comment_external_requests": "If the platform restricts external origins, configure your Odoo host (e.g. odoo.YOUR_DOMAIN) in the platform CORS/allowlist; no domain is hardcoded here.",
 
   "build_config": {
-    "type": "remote",
-    "remote_entry_url": "/modules/odoo-erp/assets/remoteEntry.js",
-    "scope": "odoo_erp_module",
-    "exposed_module": "./App"
+    "type": "iife",
+    "remote_entry_url": "/modules/odoo-erp/nkz-module.js"
   },
 
   "slots": {

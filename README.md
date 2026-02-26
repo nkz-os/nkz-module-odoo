@@ -106,9 +106,17 @@ kubectl create secret generic odoo-db-secret \
   --from-literal=username='odoo' \
   --from-literal=password='YOUR_DB_PASSWORD'
 
-# 4. Deploy
+# 4. Review k8s/ manifests — update hosts in ingress.yaml and ConfigMap values
+#    if deploying to a different domain than the defaults in the repo.
+# 5. Deploy
 kubectl apply -f k8s/
 ```
+
+### Configuration
+
+- **Frontend**: API base URL is relative `/api/odoo` unless overridden by host-injected config or `VITE_API_URL`.
+- **Backend**: `ODOO_URL` controls "Open in Odoo" links. When empty, links are relative (`/odoo/web?db=...`). Set it (e.g. `https://odoo.YOUR_DOMAIN`) when Odoo is on a separate subdomain.
+- **K8s**: Ingress hosts, ConfigMap URLs and CORS origins should match your deployment domain. See `k8s/configmap.yaml` and `k8s/ingress.yaml`.
 
 ## Integrations
 

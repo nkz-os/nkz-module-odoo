@@ -36,10 +36,10 @@ INSERT INTO auth_oauth_provider (
     'nekazari-odoo',                                                 -- Client ID (must match Keycloak client)
     true,                                                            -- Enabled
     'Login with Nekazari',                                           -- Button text
-    'https://auth.artotxiki.com/auth/realms/nekazari/protocol/openid-connect/auth',
+    'https://auth.robotika.cloud/auth/realms/nekazari/protocol/openid-connect/auth',
     'openid email profile',                                          -- Scopes
-    'https://auth.artotxiki.com/auth/realms/nekazari/protocol/openid-connect/token/introspect',
-    'https://auth.artotxiki.com/auth/realms/nekazari/protocol/openid-connect/userinfo',
+    'https://auth.robotika.cloud/auth/realms/nekazari/protocol/openid-connect/token/introspect',
+    'https://auth.robotika.cloud/auth/realms/nekazari/protocol/openid-connect/userinfo',
     'fa fa-fw fa-sign-in text-primary',                              -- CSS class for button
     10,                                                              -- Sequence (order in login page)
     1,                                                               -- create_uid (admin)
@@ -57,11 +57,11 @@ INSERT INTO auth_oauth_provider (
 -- Client Protocol: openid-connect
 -- Access Type: confidential (or public for simpler setup)
 -- Valid Redirect URIs:
---   - https://odoo.nkz.artotxiki.com/*
---   - https://nekazari.artotxiki.com/modules/odoo-erp/*
+--   - https://odoo.robotika.cloud/*
+--   - https://nekazari.robotika.cloud/modules/odoo-erp/*
 -- Web Origins:
---   - https://odoo.nkz.artotxiki.com
---   - https://nekazari.artotxiki.com
+--   - https://odoo.robotika.cloud
+--   - https://nekazari.robotika.cloud
 --
 -- Mappers (add these to include user info in token):
 -- 1. email -> claim name: email

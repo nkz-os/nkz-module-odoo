@@ -234,8 +234,8 @@ async def get_odoo_entity_url(
     tenant_id: str = Depends(get_current_tenant)
 ):
     """Get URL to open an Odoo entity in the web interface."""
-    # Build Odoo URL with action to open the record
-    base_url = f"https://{tenant_id}.odoo.nkz.artotxiki.com"
+    # ODOO_URL empty = relative path (same origin). Set in env for separate Odoo subdomain.
+    base_url = (settings.ODOO_URL or "").strip().rstrip("/")
     model_to_action = {
         "product.template": "product.product_template_action",
         "maintenance.equipment": "maintenance.hr_equipment_action",
@@ -246,6 +246,6 @@ async def get_odoo_entity_url(
 
     action = model_to_action.get(odoo_model, "")
 
-    return {
-        "url": f"{base_url}/web#id={odoo_id}&model={odoo_model}&action={action}&view_type=form"
-    }
+    path = f"/web#id={odoo_id}&model={odoo_model}&action={action}&view_type=form"
+    url = f"{base_url}{path}" if base_url else f"/odoo{path}"
+    return {"url": url}

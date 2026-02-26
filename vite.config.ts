@@ -54,7 +54,7 @@ export default defineConfig({
         changeOrigin: true
       },
       '/api': {
-        target: 'https://nkz.artotxiki.com',
+        target: process.env.VITE_DEV_API_TARGET || 'http://localhost:8000',
         changeOrigin: true
       }
     }
