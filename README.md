@@ -62,10 +62,9 @@ nkz-module-odoo/
 │   ├── odoo.conf         # Multi-DB config
 │   └── addons/
 │       └── nekazari_connector/  # Custom Odoo module
-├── frontend/
-│   ├── Dockerfile
-│   └── nginx.conf
-├── k8s/                  # Kubernetes manifests
+├── k8s/                  # Kubernetes manifests (backend, odoo, postgres-odoo; no frontend pod)
+├── src/moduleEntry.ts    # IIFE entry for host (window.__NKZ__.register)
+├── vite.module.config.ts # Build config for dist/nkz-module.js
 └── docker-compose.yml    # Local development
 ```
 
@@ -85,32 +84,39 @@ docker-compose up -d
 
 ### Production Deployment
 
+Same pattern as other Nekazari modules: **frontend = IIFE bundle in MinIO** (no frontend pod). Backend + Odoo + Postgres run in K8s.
+
+**1. Frontend (IIFE bundle → MinIO)**
+
 ```bash
-# 1. Build images
-docker build -f frontend/Dockerfile -t ghcr.io/k8-benetis/nkz-module-odoo/odoo-frontend:latest .
+npm run build:module   # → dist/nkz-module.js
+# Upload to MinIO (from server or machine with mc configured):
+#   mc mirror --overwrite dist/ minio/nekazari-frontend/modules/odoo-erp/
+# Or: mc cp dist/nkz-module.js minio/nekazari-frontend/modules/odoo-erp/nkz-module.js
+```
+
+Ensure the platform DB has `remote_entry_url = '/modules/odoo-erp/nkz-module.js'` for this module (see `k8s/registration.sql`).
+
+**2. Backend + Odoo (K8s)**
+
+```bash
+# Build and push images (no frontend image)
 docker build -f backend/Dockerfile -t ghcr.io/k8-benetis/nkz-module-odoo/odoo-backend:latest ./backend
 docker build -f odoo/Dockerfile -t ghcr.io/k8-benetis/nkz-module-odoo/odoo:latest ./odoo
-
-# 2. Push to registry
-docker push ghcr.io/k8-benetis/nkz-module-odoo/odoo-frontend:latest
 docker push ghcr.io/k8-benetis/nkz-module-odoo/odoo-backend:latest
 docker push ghcr.io/k8-benetis/nkz-module-odoo/odoo:latest
 
-# 3. Create secrets (CHANGE PASSWORDS!)
-kubectl create secret generic odoo-secret \
-  --namespace=nekazari \
-  --from-literal=master-password='YOUR_SECURE_PASSWORD'
+# Create secrets if not already present (CHANGE PASSWORDS!)
+kubectl create secret generic odoo-secret -n nekazari --from-literal=master-password='YOUR_SECURE_PASSWORD' --dry-run=client -o yaml | kubectl apply -f -
+kubectl create secret generic odoo-db-secret -n nekazari --from-literal=username='odoo' --from-literal=password='YOUR_DB_PASSWORD' --dry-run=client -o yaml | kubectl apply -f -
 
-kubectl create secret generic odoo-db-secret \
-  --namespace=nekazari \
-  --from-literal=username='odoo' \
-  --from-literal=password='YOUR_DB_PASSWORD'
-
-# 4. Review k8s/ manifests — update hosts in ingress.yaml and ConfigMap values
-#    if deploying to a different domain than the defaults in the repo.
-# 5. Deploy
+# Deploy (configmap, postgres-odoo, odoo, backend; no frontend resources)
 kubectl apply -f k8s/
 ```
+
+**3. Configuration**
+
+- Review `k8s/configmap.yaml` and `k8s/ingress.yaml` for your domains (Keycloak, CORS, ODOO_URL).
 
 ### Configuration
 

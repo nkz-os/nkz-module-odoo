@@ -9,8 +9,8 @@
 -- after deploying the module to Kubernetes.
 --
 -- PREREQUISITES:
+-- - Module frontend: IIFE bundle at MinIO nekazari-frontend/modules/odoo-erp/nkz-module.js (no frontend pod)
 -- - Module backend deployed to K8s (service: odoo-backend-service)
--- - Module frontend deployed to K8s (service: odoo-frontend-service)
 -- - Odoo deployed to K8s (service: odoo-service)
 -- - PostgreSQL for Odoo deployed (service: postgres-odoo-service)
 -- =============================================================================
