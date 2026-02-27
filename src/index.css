@@ -184,6 +184,141 @@ body {
   animation: spin 1s linear infinite;
 }
 
+/* =============================================================================
+   Module page (/odoo route) — landing layout
+   ============================================================================= */
+.odoo-module-page__wrap {
+  min-height: 100%;
+  background: linear-gradient(180deg, var(--odoo-bg) 0%, #f0f0f0 100%);
+}
+
+.odoo-module-page {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 3rem;
+}
+
+.odoo-module-page__hero {
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+
+.odoo-module-page__hero-icon {
+  color: var(--odoo-primary);
+  margin-bottom: 1rem;
+  opacity: 0.95;
+}
+
+.odoo-module-page__title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--odoo-text);
+  margin: 0 0 0.75rem;
+  letter-spacing: -0.02em;
+}
+
+.odoo-module-page__lead {
+  font-size: 1.0625rem;
+  line-height: 1.6;
+  color: var(--odoo-text-muted);
+  margin: 0;
+}
+
+.odoo-module-page__features {
+  margin-bottom: 2.5rem;
+}
+
+.odoo-module-page__features-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--odoo-text);
+  margin: 0 0 1rem;
+}
+
+.odoo-module-page__features-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.odoo-module-page__feature {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.9375rem;
+  color: var(--odoo-text-muted);
+}
+
+.odoo-module-page__feature-icon {
+  flex-shrink: 0;
+  color: var(--odoo-secondary);
+  opacity: 0.9;
+}
+
+.odoo-module-page__card {
+  background: var(--odoo-card-bg);
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  border: 1px solid var(--odoo-border);
+  padding: 2rem;
+  text-align: center;
+}
+
+.odoo-module-page__card--cta {
+  padding: 2rem 2.5rem;
+}
+
+.odoo-module-page__card--error {
+  color: var(--odoo-danger);
+}
+
+.odoo-module-page__card-text {
+  font-size: 0.9375rem;
+  color: var(--odoo-text-muted);
+  margin: 0 0 1.25rem;
+  line-height: 1.5;
+}
+
+.odoo-module-page__btn {
+  gap: 0.5rem;
+  text-decoration: none;
+  font-size: 1rem;
+  padding: 0.875rem 1.75rem;
+}
+
+.odoo-module-page__btn:hover {
+  color: white;
+}
+
+.odoo-module-page__loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.5rem;
+  min-height: 140px;
+  justify-content: center;
+}
+
+.odoo-module-page__loading .odoo-spinner {
+  position: static;
+  transform: none;
+}
+
+.odoo-module-page__loading p {
+  margin: 0;
+  color: var(--odoo-text-muted);
+  font-size: 0.9375rem;
+}
+
+.odoo-module-page__hint {
+  font-size: 0.8125rem;
+  color: var(--odoo-text-muted);
+  margin: 0.75rem 0 0;
+}
+
 /* Dashboard styles */
 .odoo-dashboard {
   padding: 1.5rem;

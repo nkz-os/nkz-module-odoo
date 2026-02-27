@@ -1,6 +1,6 @@
 /**
  * Odoo ERP Module - Main page for the /odoo route (host).
- * Shows a short description and a link to open Odoo in a new tab.
+ * Shows description, features, and a link to open Odoo in a new tab.
  * No iframe embed — Odoo runs on its own subdomain (URL from backend or host __ENV__).
  *
  * @author Kate Benetis <kate@robotika.cloud>
@@ -9,7 +9,18 @@
  */
 
 import React, { useState } from 'react';
-import { Building2, ExternalLink, Settings, RefreshCw } from 'lucide-react';
+import {
+  Building2,
+  ExternalLink,
+  Settings,
+  RefreshCw,
+  Package,
+  BarChart3,
+  Zap,
+  FileText,
+  Database,
+  Shield,
+} from 'lucide-react';
 import { OdooProvider, useOdoo } from './services/context';
 import './index.css';
 
@@ -18,27 +29,40 @@ const MODULE_DESCRIPTION =
   'comunidades energéticas (Som Comunitats), inventario, ventas y contabilidad. ' +
   'Cada organización dispone de su propia base de datos Odoo aislada.';
 
+const FEATURES = [
+  { icon: Database, label: 'Una base de datos por organización (multi-tenant)' },
+  { icon: Package, label: 'Inventario, ventas y contabilidad' },
+  { icon: Zap, label: 'Comunidades energéticas y autoconsumo (Som Comunitats)' },
+  { icon: BarChart3, label: 'Sincronización con NGSI-LD y datos de la plataforma' },
+  { icon: FileText, label: 'Facturación e informes integrados' },
+  { icon: Shield, label: 'Acceso seguro con Keycloak (SSO)' },
+];
+
 function OdooModulePageContent() {
   const { tenantInfo, isLoading, error, refreshTenant, provisionOdoo } = useOdoo();
   const [isProvisioning, setIsProvisioning] = useState(false);
 
   if (isLoading) {
     return (
-      <div className="odoo-loading" style={{ minHeight: '280px' }}>
-        <div className="odoo-spinner" />
-        <p>Comprobando configuración de Odoo...</p>
+      <div className="odoo-module-page">
+        <div className="odoo-module-page__loading">
+          <div className="odoo-spinner" />
+          <p>Comprobando configuración de Odoo...</p>
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="odoo-error">
-        <h2>Error de conexión</h2>
-        <p>{error}</p>
-        <button className="odoo-btn odoo-btn-primary" onClick={refreshTenant}>
-          Reintentar
-        </button>
+      <div className="odoo-module-page">
+        <div className="odoo-module-page__card odoo-module-page__card--error">
+          <h2>Error de conexión</h2>
+          <p>{error}</p>
+          <button className="odoo-btn odoo-btn-primary" onClick={refreshTenant}>
+            Reintentar
+          </button>
+        </div>
       </div>
     );
   }
@@ -58,94 +82,92 @@ function OdooModulePageContent() {
     '';
 
   return (
-    <div
-      style={{
-        maxWidth: 560,
-        margin: '2rem auto',
-        padding: '2rem',
-        background: 'var(--odoo-card-bg)',
-        borderRadius: 12,
-        boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
-        border: '1px solid var(--odoo-border)',
-      }}
-    >
-      <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
-        <Building2 size={48} style={{ color: 'var(--odoo-primary)', marginBottom: '0.75rem' }} />
-        <h1 style={{ fontSize: '1.5rem', fontWeight: 600, color: 'var(--odoo-text)', marginBottom: '0.5rem' }}>
-          Odoo ERP
-        </h1>
-        <p style={{ fontSize: '0.9375rem', color: 'var(--odoo-text-muted)', lineHeight: 1.5 }}>
-          {MODULE_DESCRIPTION}
-        </p>
+    <div className="odoo-module-page">
+      <div className="odoo-module-page__hero">
+        <div className="odoo-module-page__hero-icon">
+          <Building2 size={56} />
+        </div>
+        <h1 className="odoo-module-page__title">Odoo ERP</h1>
+        <p className="odoo-module-page__lead">{MODULE_DESCRIPTION}</p>
       </div>
 
-      {!tenantInfo ? (
-        <div style={{ textAlign: 'center' }}>
-          <p style={{ fontSize: '0.875rem', color: 'var(--odoo-text-muted)', marginBottom: '1rem' }}>
-            Su organización aún no tiene una instancia de Odoo. Provisiónela para acceder al ERP.
+      <div className="odoo-module-page__features">
+        <h2 className="odoo-module-page__features-title">Qué incluye</h2>
+        <ul className="odoo-module-page__features-list">
+          {FEATURES.map(({ icon: Icon, label }) => (
+            <li key={label} className="odoo-module-page__feature">
+              <Icon size={20} className="odoo-module-page__feature-icon" />
+              <span>{label}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <div className="odoo-module-page__card odoo-module-page__card--cta">
+        {!tenantInfo ? (
+          <>
+            <p className="odoo-module-page__card-text">
+              Su organización aún no tiene una instancia de Odoo. Provisiónela para acceder al ERP
+              con su propia base de datos aislada.
+            </p>
+            <button
+              className="odoo-btn odoo-btn-primary odoo-module-page__btn"
+              onClick={handleProvision}
+              disabled={isProvisioning}
+            >
+              {isProvisioning ? (
+                <>
+                  <RefreshCw size={20} className="animate-spin" />
+                  Provisionando...
+                </>
+              ) : (
+                <>
+                  <Settings size={20} />
+                  Configurar Odoo ERP
+                </>
+              )}
+            </button>
+          </>
+        ) : tenantInfo.status === 'provisioning' ? (
+          <div className="odoo-module-page__loading">
+            <div className="odoo-spinner" />
+            <p>Su instancia de Odoo se está creando...</p>
+            <p className="odoo-module-page__hint">Puede tardar unos minutos.</p>
+          </div>
+        ) : odooUrl ? (
+          <>
+            <p className="odoo-module-page__card-text">
+              Su instancia está lista. Ábrala en una nueva pestaña para trabajar con el ERP.
+            </p>
+            <a
+              href={odooUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="odoo-btn odoo-btn-primary odoo-module-page__btn"
+            >
+              <ExternalLink size={20} />
+              Abrir Odoo ERP
+            </a>
+            <p className="odoo-module-page__hint">
+              Base de datos: {tenantInfo.odooDatabase || 'su base de datos'}
+            </p>
+          </>
+        ) : (
+          <p className="odoo-module-page__card-text">
+            URL de Odoo no configurada. Configure ODOO_URL en el backend o ODOO_PUBLIC_URL en el
+            host.
           </p>
-          <button
-            className="odoo-btn odoo-btn-primary"
-            onClick={handleProvision}
-            disabled={isProvisioning}
-            style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}
-          >
-            {isProvisioning ? (
-              <>
-                <RefreshCw size={18} className="animate-spin" />
-                Provisionando...
-              </>
-            ) : (
-              <>
-                <Settings size={18} />
-                Configurar Odoo ERP
-              </>
-            )}
-          </button>
-        </div>
-      ) : tenantInfo.status === 'provisioning' ? (
-        <div className="odoo-loading" style={{ minHeight: '120px' }}>
-          <div className="odoo-spinner" />
-          <p>Su instancia de Odoo se está creando...</p>
-          <p style={{ fontSize: '0.875rem', opacity: 0.8 }}>Puede tardar unos minutos.</p>
-        </div>
-      ) : odooUrl ? (
-        <div style={{ textAlign: 'center' }}>
-          <a
-            href={odooUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="odoo-btn odoo-btn-primary"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              textDecoration: 'none',
-            }}
-          >
-            <ExternalLink size={18} />
-            Abrir Odoo ERP
-          </a>
-          <p style={{ fontSize: '0.8125rem', color: 'var(--odoo-text-muted)', marginTop: '1rem' }}>
-            Se abrirá Odoo en una nueva pestaña ({tenantInfo.odooDatabase || 'su base de datos'}).
-          </p>
-        </div>
-      ) : (
-        <div style={{ textAlign: 'center' }}>
-          <p style={{ fontSize: '0.875rem', color: 'var(--odoo-text-muted)' }}>
-            URL de Odoo no configurada. Configure ODOO_URL en el backend o ODOO_PUBLIC_URL en el host.
-          </p>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }
 
-/** Main component for the host route /odoo — description + link to Odoo (no embed). */
+/** Main component for the host route /odoo — description + features + link to Odoo (no embed). */
 export default function OdooModulePage() {
   return (
     <OdooProvider>
-      <div className="odoo-module" style={{ minHeight: '100%' }}>
+      <div className="odoo-module odoo-module-page__wrap">
         <OdooModulePageContent />
       </div>
     </OdooProvider>
