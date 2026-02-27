@@ -89,10 +89,13 @@ Same pattern as other Nekazari modules: **frontend = IIFE bundle in MinIO** (no 
 **1. Frontend (IIFE bundle → MinIO)**
 
 ```bash
-npm run build:module   # → dist/nkz-module.js
-# Upload to MinIO (from server or machine with mc configured):
-#   mc mirror --overwrite dist/ minio/nekazari-frontend/modules/odoo-erp/
-# Or: mc cp dist/nkz-module.js minio/nekazari-frontend/modules/odoo-erp/nkz-module.js
+# From repo root — build and deploy to MinIO via server (CLAUDE.md / .antigravity)
+./scripts/deploy-module-to-minio.sh --remote g@109.123.252.120
+
+# Or on the server after build:
+pnpm run build:module
+./scripts/deploy-module-to-minio.sh
+# Manual: mc cp dist/nkz-module.js minio/nekazari-frontend/modules/odoo-erp/nkz-module.js
 ```
 
 Ensure the platform DB has `remote_entry_url = '/modules/odoo-erp/nkz-module.js'` for this module (see `k8s/registration.sql`).

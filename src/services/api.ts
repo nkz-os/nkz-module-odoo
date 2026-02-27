@@ -51,24 +51,31 @@ class OdooApiClient {
   }
 
   /**
-   * Resolve the API base URL. Prefer relative path so no domain is hardcoded.
-   * Priority: host-injected config → VITE_API_URL → relative /api/odoo.
+   * Resolve the API base URL. Must use the host's API domain (nkz.robotika.cloud)
+   * so requests hit the API ingress, not the frontend origin (nekazari.robotika.cloud).
+   * Priority: window.__ENV__ (host-injected) → __nekazariConfig → build-time env → relative.
    */
   private resolveApiUrl(): string {
     if (typeof window === 'undefined') {
       return '/api/odoo';
     }
 
+    const env = (window as any).__ENV__;
+    if (env) {
+      const base = String(env.API_URL || env.VITE_API_URL || '').replace(/\/+$/, '');
+      if (base) return `${base}/api/odoo`;
+    }
+
     const config = (window as any).__nekazariConfig;
     if (config?.apiUrl) {
       const base = String(config.apiUrl).replace(/\/+$/, '');
-      return base ? `${base}/api/odoo` : '/api/odoo';
+      if (base) return `${base}/api/odoo`;
     }
 
     const envApiUrl = (import.meta as any).env?.VITE_API_URL;
     if (envApiUrl) {
       const base = String(envApiUrl).replace(/\/+$/, '');
-      return base ? `${base}/api/odoo` : '/api/odoo';
+      if (base) return `${base}/api/odoo`;
     }
 
     return '/api/odoo';
@@ -150,12 +157,25 @@ class OdooApiClient {
       }
     });
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.detail || `API Error: ${response.status}`);
+    const text = await response.text();
+    let data: unknown;
+    try {
+      data = text ? JSON.parse(text) : null;
+    } catch {
+      const preview = text.slice(0, 120).replace(/\s+/g, ' ');
+      throw new Error(
+        response.ok
+          ? `API returned non-JSON (e.g. HTML). Is the Odoo backend deployed and /api/odoo routed? Preview: ${preview || '(empty)'}`
+          : `API Error ${response.status}. Response was not JSON. ${preview ? `Preview: ${preview}` : 'Check backend and ingress for /api/odoo.'}`
+      );
     }
 
-    return response.json();
+    if (!response.ok) {
+      const err = data as { detail?: string };
+      throw new Error(err?.detail || `API Error: ${response.status}`);
+    }
+
+    return data as T;
   }
 
   // Tenant Management
