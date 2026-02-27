@@ -51,8 +51,8 @@ class OdooApiClient {
   }
 
   /**
-   * Resolve the API base URL. Must use the host's API domain (nkz.robotika.cloud)
-   * so requests hit the API ingress, not the frontend origin (nekazari.robotika.cloud).
+   * Resolve the API base URL. Must use the host's API base URL so requests hit
+   * the API ingress, not the frontend origin (which would return HTML).
    * Priority: window.__ENV__ (host-injected) → __nekazariConfig → build-time env → relative.
    */
   private resolveApiUrl(): string {

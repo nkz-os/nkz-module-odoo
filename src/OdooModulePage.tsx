@@ -1,7 +1,7 @@
 /**
  * Odoo ERP Module - Main page for the /odoo route (host).
  * Shows a short description and a link to open Odoo in a new tab.
- * No iframe embed — Odoo runs on its own subdomain (odoo.robotika.cloud).
+ * No iframe embed — Odoo runs on its own subdomain (URL from backend or host __ENV__).
  *
  * @author Kate Benetis <kate@robotika.cloud>
  * @company Robotika
@@ -52,7 +52,10 @@ function OdooModulePageContent() {
     }
   };
 
-  const odooUrl = tenantInfo?.odooUrl || 'https://odoo.robotika.cloud';
+  const odooUrl =
+    tenantInfo?.odooUrl ||
+    (typeof window !== 'undefined' && (window as any).__ENV__?.ODOO_PUBLIC_URL) ||
+    '';
 
   return (
     <div
@@ -106,7 +109,7 @@ function OdooModulePageContent() {
           <p>Su instancia de Odoo se está creando...</p>
           <p style={{ fontSize: '0.875rem', opacity: 0.8 }}>Puede tardar unos minutos.</p>
         </div>
-      ) : (
+      ) : odooUrl ? (
         <div style={{ textAlign: 'center' }}>
           <a
             href={odooUrl}
@@ -125,6 +128,12 @@ function OdooModulePageContent() {
           </a>
           <p style={{ fontSize: '0.8125rem', color: 'var(--odoo-text-muted)', marginTop: '1rem' }}>
             Se abrirá Odoo en una nueva pestaña ({tenantInfo.odooDatabase || 'su base de datos'}).
+          </p>
+        </div>
+      ) : (
+        <div style={{ textAlign: 'center' }}>
+          <p style={{ fontSize: '0.875rem', color: 'var(--odoo-text-muted)' }}>
+            URL de Odoo no configurada. Configure ODOO_URL en el backend o ODOO_PUBLIC_URL en el host.
           </p>
         </div>
       )}

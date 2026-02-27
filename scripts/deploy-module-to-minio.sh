@@ -6,7 +6,7 @@
 #
 # Usage:
 #   On server (after build): ./scripts/deploy-module-to-minio.sh
-#   From local (build + scp + deploy): ./scripts/deploy-module-to-minio.sh --remote g@109.123.252.120
+#   From local (build + scp + deploy): ./scripts/deploy-module-to-minio.sh --remote USER@HOST
 #
 set -euo pipefail
 MODULE_ID="odoo-erp"
