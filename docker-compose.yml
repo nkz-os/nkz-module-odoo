@@ -1,6 +1,7 @@
 # Nekazari Odoo ERP Module - Docker Compose
 #
-# Local development environment.
+# Local development only. No production credentials or hardcoded domains.
+# Override with .env (see env.example) for Keycloak and other URLs.
 #
 # Author: Kate Benetis <kate@robotika.cloud>
 # Company: Robotika
@@ -9,13 +10,13 @@
 version: '3.8'
 
 services:
-  # PostgreSQL for Odoo
+  # PostgreSQL for Odoo (dev defaults; use .env in shared environments)
   postgres-odoo:
     image: postgres:15-alpine
     container_name: nkz-odoo-postgres
     environment:
       POSTGRES_USER: odoo
-      POSTGRES_PASSWORD: odoo_dev_password
+      POSTGRES_PASSWORD: ${ODOO_DB_PASSWORD:-odoo_dev_password}
       POSTGRES_DB: postgres
     ports:
       - "5433:5432"
@@ -40,8 +41,8 @@ services:
       - DB_HOST=postgres-odoo
       - DB_PORT=5432
       - DB_USER=odoo
-      - DB_PASSWORD=odoo_dev_password
-      - ODOO_MASTER_PASSWORD=admin
+      - DB_PASSWORD=${ODOO_DB_PASSWORD:-odoo_dev_password}
+      - ODOO_MASTER_PASSWORD=${ODOO_MASTER_PASSWORD:-admin}
       - ODOO_TEMPLATE_DB=nkz_odoo_template
     ports:
       - "8069:8069"
@@ -63,14 +64,14 @@ services:
       - DATABASE_URL=postgresql://postgres:postgres@host.docker.internal:5432/nekazari
       - ODOO_HOST=odoo
       - ODOO_PORT=8069
-      - ODOO_MASTER_PASSWORD=admin
+      - ODOO_MASTER_PASSWORD=${ODOO_MASTER_PASSWORD:-admin}
       - ODOO_TEMPLATE_DB=nkz_odoo_template
       - ODOO_DB_HOST=postgres-odoo
       - ODOO_DB_PORT=5432
       - ODOO_DB_USER=odoo
-      - ODOO_DB_PASSWORD=odoo_dev_password
+      - ODOO_DB_PASSWORD=${ODOO_DB_PASSWORD:-odoo_dev_password}
       - REDIS_URL=redis://host.docker.internal:6379/0
-      - KEYCLOAK_URL=https://auth.robotika.cloud/auth
+      - KEYCLOAK_URL=${KEYCLOAK_URL:-http://host.docker.internal:8080/auth}
       - KEYCLOAK_REALM=nekazari
       - ORION_URL=http://host.docker.internal:1026
       - N8N_URL=http://host.docker.internal:5678

@@ -29,7 +29,7 @@ class Settings(BaseSettings):
     # Odoo Connection
     ODOO_HOST: str = "odoo-service"
     ODOO_PORT: int = 8069
-    ODOO_MASTER_PASSWORD: str = "admin"  # For database management
+    ODOO_MASTER_PASSWORD: str = ""  # Must be set via env/secret in production
     ODOO_TEMPLATE_DB: str = "nkz_odoo_template"
     # Public URL for Odoo (links returned to frontend). Empty = relative path /odoo (same origin).
     ODOO_URL: str = ""

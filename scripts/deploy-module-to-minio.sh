@@ -3,6 +3,8 @@
 # Complies with CLAUDE.md and .antigravity/devops-protocol.md:
 #   - Never write to MinIO filesystem directly; use S3 API (mc).
 #   - Module frontends are NOT deployed as K8s pods.
+#   - MinIO: uses default credentials (minioadmin/minioadmin) for port-forward;
+#     in production MinIO must be configured with proper credentials and mc alias set accordingly.
 #
 # Usage:
 #   On server (after build): ./scripts/deploy-module-to-minio.sh
