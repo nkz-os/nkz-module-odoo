@@ -10,7 +10,7 @@ License: AGPL-3.0
 """
 
 import logging
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from pydantic import BaseModel
 from typing import Optional
 from datetime import datetime
@@ -44,6 +44,7 @@ class ProvisionRequest(BaseModel):
 
 @router.get("/info", response_model=TenantOdooInfo)
 async def get_tenant_info(
+    response: Response,
     tenant_id: str = Depends(get_current_tenant),
     user: dict = Depends(get_current_user)
 ):
@@ -52,6 +53,8 @@ async def get_tenant_info(
 
     Returns the Odoo database name, URL, status, and installed modules.
     """
+    response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate"
+    response.headers["Pragma"] = "no-cache"
     logger.info(f"Getting Odoo info for tenant: {tenant_id}")
 
     try:
