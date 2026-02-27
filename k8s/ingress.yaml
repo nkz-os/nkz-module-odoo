@@ -1,9 +1,9 @@
-# Nekazari Odoo ERP Module - Ingress Configuration
+# Nekazari Odoo ERP Module - Ingress
 #
-# Module frontend is served from MinIO (same as other modules): host loads
-# /modules/odoo-erp/nkz-module.js via frontend-static -> MinIO. No frontend pod.
+# Module frontend: served from MinIO; host loads /modules/odoo-erp/nkz-module.js.
 #
-# API: nkz.robotika.cloud  |  Odoo app: odoo.robotika.cloud
+# Replace YOUR_DOMAIN with your deployment domain. Use the same API host as your
+# main platform if combined (e.g. nkz.YOUR_DOMAIN); otherwise api.YOUR_DOMAIN.
 #
 # Author: Kate Benetis <kate@robotika.cloud>
 # Company: Robotika
@@ -25,7 +25,7 @@ metadata:
 spec:
   ingressClassName: traefik
   rules:
-    - host: nkz.robotika.cloud
+    - host: api.YOUR_DOMAIN
       http:
         paths:
           - path: /api/odoo
@@ -37,11 +37,11 @@ spec:
                   number: 80
   tls:
     - hosts:
-        - nkz.robotika.cloud
+        - api.YOUR_DOMAIN
       secretName: nkz-tls
 
 ---
-# Odoo app on dedicated subdomain (odoo.robotika.cloud)
+# Middleware: set X-Forwarded-Host so Odoo builds correct URLs (replace YOUR_DOMAIN).
 apiVersion: traefik.io/v1alpha1
 kind: Middleware
 metadata:
@@ -51,7 +51,7 @@ spec:
   headers:
     customRequestHeaders:
       X-Forwarded-Proto: "https"
-      X-Forwarded-Host: "odoo.robotika.cloud"
+      X-Forwarded-Host: "odoo.YOUR_DOMAIN"
 
 ---
 apiVersion: networking.k8s.io/v1
@@ -70,7 +70,7 @@ metadata:
 spec:
   ingressClassName: traefik
   rules:
-    - host: odoo.robotika.cloud
+    - host: odoo.YOUR_DOMAIN
       http:
         paths:
           - path: /
@@ -82,5 +82,5 @@ spec:
                   number: 8069
   tls:
     - hosts:
-        - odoo.robotika.cloud
+        - odoo.YOUR_DOMAIN
       secretName: odoo-tls

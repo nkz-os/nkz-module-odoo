@@ -90,7 +90,7 @@ Same pattern as other Nekazari modules: **frontend = IIFE bundle in MinIO** (no 
 
 ```bash
 # From repo root — build and deploy to MinIO via server (CLAUDE.md / .antigravity)
-./scripts/deploy-module-to-minio.sh --remote g@109.123.252.120
+./scripts/deploy-module-to-minio.sh --remote USER@HOST
 
 # Or on the server after build:
 pnpm run build:module
@@ -119,7 +119,7 @@ kubectl apply -f k8s/
 
 **3. Configuration**
 
-- Review `k8s/configmap.yaml` and `k8s/ingress.yaml` for your domains (Keycloak, CORS, ODOO_URL).
+- Replace `YOUR_DOMAIN` in `k8s/configmap.yaml` and `k8s/ingress.yaml` with your domain (Keycloak, CORS, ODOO_URL, API/Odoo hosts). No hardcoded production URLs in the repo.
 
 ### Configuration
 

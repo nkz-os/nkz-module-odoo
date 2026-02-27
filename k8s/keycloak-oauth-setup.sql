@@ -5,8 +5,9 @@
 -- Execute this AFTER the database is created and auth_oauth module is installed.
 --
 -- USAGE:
--- Execute in the Odoo PostgreSQL database (postgres-odoo-service)
--- for each tenant database: nkz_odoo_{tenant_id}
+-- 1. Replace YOUR_DOMAIN (or AUTH_HOST) with your Keycloak host (e.g. auth.example.com).
+-- 2. Execute in the Odoo PostgreSQL database (postgres-odoo-service)
+--    for each tenant database: nkz_odoo_{tenant_id}
 --
 -- PREREQUISITES:
 -- 1. Create a Keycloak client for Odoo (see below)
@@ -36,10 +37,10 @@ INSERT INTO auth_oauth_provider (
     'nekazari-odoo',                                                 -- Client ID (must match Keycloak client)
     true,                                                            -- Enabled
     'Login with Nekazari',                                           -- Button text
-    'https://auth.robotika.cloud/auth/realms/nekazari/protocol/openid-connect/auth',
+    'https://auth.YOUR_DOMAIN/auth/realms/nekazari/protocol/openid-connect/auth',
     'openid email profile',                                          -- Scopes
-    'https://auth.robotika.cloud/auth/realms/nekazari/protocol/openid-connect/token/introspect',
-    'https://auth.robotika.cloud/auth/realms/nekazari/protocol/openid-connect/userinfo',
+    'https://auth.YOUR_DOMAIN/auth/realms/nekazari/protocol/openid-connect/token/introspect',
+    'https://auth.YOUR_DOMAIN/auth/realms/nekazari/protocol/openid-connect/userinfo',
     'fa fa-fw fa-sign-in text-primary',                              -- CSS class for button
     10,                                                              -- Sequence (order in login page)
     1,                                                               -- create_uid (admin)
@@ -57,11 +58,11 @@ INSERT INTO auth_oauth_provider (
 -- Client Protocol: openid-connect
 -- Access Type: confidential (or public for simpler setup)
 -- Valid Redirect URIs:
---   - https://odoo.robotika.cloud/*
---   - https://nekazari.robotika.cloud/modules/odoo-erp/*
+--   - https://odoo.YOUR_DOMAIN/*
+--   - https://frontend.YOUR_DOMAIN/modules/odoo-erp/*
 -- Web Origins:
---   - https://odoo.robotika.cloud
---   - https://nekazari.robotika.cloud
+--   - https://odoo.YOUR_DOMAIN
+--   - https://frontend.YOUR_DOMAIN
 --
 -- Mappers (add these to include user info in token):
 -- 1. email -> claim name: email
