@@ -178,9 +178,9 @@ class OdooApiClient {
     return data as T;
   }
 
-  // Tenant Management
+  // Tenant Management (cache-bust so browser never uses stale odooUrl)
   async getTenantInfo(): Promise<TenantOdooInfo> {
-    return this.request('/tenant/info');
+    return this.request(`/tenant/info?nocache=${Date.now()}`);
   }
 
   async provisionTenant(): Promise<TenantOdooInfo> {
