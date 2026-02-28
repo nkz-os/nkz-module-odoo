@@ -73,6 +73,10 @@ spec:
               mountPath: /var/lib/odoo
             - name: odoo-addons
               mountPath: /mnt/extra-addons
+            - name: odoo-server-config
+              mountPath: /etc/odoo/odoo.conf
+              subPath: odoo.conf
+              readOnly: true
           livenessProbe:
             httpGet:
               path: /web/health
@@ -92,6 +96,9 @@ spec:
             claimName: odoo-data-pvc
         - name: odoo-addons
           emptyDir: {}
+        - name: odoo-server-config
+          configMap:
+            name: odoo-server-config
 
 ---
 apiVersion: v1

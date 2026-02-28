@@ -1,0 +1,31 @@
+# Odoo 16 server config override: dbfilter allows tenant DBs passed via ?db=nkz_odoo_<tenant>.
+# Mounted over /etc/odoo/odoo.conf; entrypoint still expands ${ODOO_MASTER_PASSWORD}.
+# Author: Robotika | License: AGPL-3.0
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: odoo-server-config
+  namespace: nekazari
+  labels:
+    app: odoo
+    module: odoo-erp
+data:
+  odoo.conf: |
+    [options]
+    admin_passwd = ${ODOO_MASTER_PASSWORD:-admin}
+    dbfilter = ^nkz_odoo_.*$
+    db_template = nkz_odoo_template
+    addons_path = /mnt/extra-addons,/usr/lib/python3/dist-packages/odoo/addons
+    http_port = 8069
+    longpolling_port = 8072
+    proxy_mode = True
+    workers = 4
+    max_cron_threads = 2
+    limit_time_cpu = 600
+    limit_time_real = 1200
+    limit_memory_hard = 2684354560
+    limit_memory_soft = 2147483648
+    log_level = info
+    log_handler = :INFO
+    server_wide_modules = base,web
+    list_db = True

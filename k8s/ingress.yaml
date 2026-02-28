@@ -73,6 +73,20 @@ spec:
     - host: odoo.YOUR_DOMAIN
       http:
         paths:
+          - path: /web/database/manager
+            pathType: Prefix
+            backend:
+              service:
+                name: odoo-forbidden-service
+                port:
+                  number: 80
+          - path: /web/database/selector
+            pathType: Prefix
+            backend:
+              service:
+                name: odoo-forbidden-service
+                port:
+                  number: 80
           - path: /
             pathType: Prefix
             backend:

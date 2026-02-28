@@ -52,6 +52,12 @@ spec:
                 secretKeyRef:
                   name: odoo-secret
                   key: master-password
+            - name: ODOO_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: odoo-secret
+                  key: odoo-admin-password
+                  optional: true
             - name: ODOO_TEMPLATE_DB
               value: "nkz_odoo_template"
             # Odoo DB

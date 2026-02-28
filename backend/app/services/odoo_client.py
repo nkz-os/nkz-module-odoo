@@ -163,9 +163,9 @@ class OdooClient:
         """
         logger.info(f"Installing modules in {db_name}: {modules}")
 
-        # Connect to the database as admin
+        # Connect to the database as admin (password from settings/secret)
         client = OdooClient(database=db_name)
-        client.authenticate("admin", "admin")  # Default admin credentials
+        client.authenticate("admin", settings.ODOO_ADMIN_PASSWORD or "admin")
 
         # Find module IDs
         module_ids = client.execute(
@@ -188,7 +188,7 @@ class OdooClient:
     async def get_installed_modules(self, db_name: str) -> list[str]:
         """Get list of installed modules in a database."""
         client = OdooClient(database=db_name)
-        client.authenticate("admin", "admin")
+        client.authenticate("admin", settings.ODOO_ADMIN_PASSWORD or "admin")
 
         module_ids = client.execute(
             "ir.module.module",
@@ -223,7 +223,7 @@ class OdooClient:
         logger.info(f"Creating user in {db_name}: {email}")
 
         client = OdooClient(database=db_name)
-        client.authenticate("admin", "admin")
+        client.authenticate("admin", settings.ODOO_ADMIN_PASSWORD or "admin")
 
         # Create user
         user_data = {
@@ -265,7 +265,7 @@ class OdooClient:
     ) -> int:
         """Create a record in Odoo."""
         client = OdooClient(database=db_name)
-        client.authenticate("admin", "admin")
+        client.authenticate("admin", settings.ODOO_ADMIN_PASSWORD or "admin")
 
         record_id = client.execute(model, "create", values)
         logger.debug(f"Created {model} record: {record_id}")
@@ -280,7 +280,7 @@ class OdooClient:
     ):
         """Update a record in Odoo."""
         client = OdooClient(database=db_name)
-        client.authenticate("admin", "admin")
+        client.authenticate("admin", settings.ODOO_ADMIN_PASSWORD or "admin")
 
         client.execute(model, "write", [record_id], values)
         logger.debug(f"Updated {model} record: {record_id}")
@@ -294,7 +294,7 @@ class OdooClient:
     ) -> dict:
         """Read a record from Odoo."""
         client = OdooClient(database=db_name)
-        client.authenticate("admin", "admin")
+        client.authenticate("admin", settings.ODOO_ADMIN_PASSWORD or "admin")
 
         result = client.execute(
             model,
@@ -315,7 +315,7 @@ class OdooClient:
     ) -> list[dict]:
         """Search records in Odoo."""
         client = OdooClient(database=db_name)
-        client.authenticate("admin", "admin")
+        client.authenticate("admin", settings.ODOO_ADMIN_PASSWORD or "admin")
 
         kwargs = {}
         if fields:
