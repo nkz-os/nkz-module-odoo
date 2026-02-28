@@ -189,39 +189,53 @@ body {
    ============================================================================= */
 .odoo-module-page__wrap {
   min-height: 100%;
-  background: linear-gradient(180deg, var(--odoo-bg) 0%, #f0f0f0 100%);
+  background: linear-gradient(160deg, #f8f7fa 0%, #eef1f4 50%, #e8eef4 100%);
 }
 
 .odoo-module-page {
-  max-width: 720px;
+  max-width: 800px;
   margin: 0 auto;
-  padding: 2rem 1.5rem 3rem;
+  padding: 2.5rem 1.5rem 4rem;
 }
 
 .odoo-module-page__hero {
   text-align: center;
-  margin-bottom: 2.5rem;
+  margin-bottom: 2.75rem;
+  padding: 2rem 1.5rem;
+  background: linear-gradient(135deg, rgba(113, 75, 103, 0.06) 0%, rgba(1, 126, 132, 0.05) 100%);
+  border-radius: 20px;
+  border: 1px solid rgba(113, 75, 103, 0.12);
 }
 
 .odoo-module-page__hero-icon {
-  color: var(--odoo-primary);
-  margin-bottom: 1rem;
-  opacity: 0.95;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 88px;
+  height: 88px;
+  margin-bottom: 1.25rem;
+  background: linear-gradient(145deg, var(--odoo-primary), var(--odoo-secondary));
+  color: white;
+  border-radius: 20px;
+  box-shadow: 0 8px 24px rgba(113, 75, 103, 0.25);
 }
 
 .odoo-module-page__title {
-  font-size: 2rem;
+  font-size: 2.25rem;
   font-weight: 700;
   color: var(--odoo-text);
   margin: 0 0 0.75rem;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.03em;
 }
 
 .odoo-module-page__lead {
   font-size: 1.0625rem;
-  line-height: 1.6;
+  line-height: 1.65;
   color: var(--odoo-text-muted);
   margin: 0;
+  max-width: 560px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .odoo-module-page__features {
@@ -232,7 +246,9 @@ body {
   font-size: 1.125rem;
   font-weight: 600;
   color: var(--odoo-text);
-  margin: 0 0 1rem;
+  margin: 0 0 1.25rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid var(--odoo-border);
 }
 
 .odoo-module-page__features-list {
@@ -240,56 +256,80 @@ body {
   margin: 0;
   padding: 0;
   display: grid;
-  gap: 0.75rem;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1rem;
 }
 
 .odoo-module-page__feature {
   display: flex;
-  align-items: center;
-  gap: 0.75rem;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  background: var(--odoo-card-bg);
+  border-radius: 12px;
+  border: 1px solid var(--odoo-border);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
   font-size: 0.9375rem;
-  color: var(--odoo-text-muted);
+  color: var(--odoo-text);
+  transition: box-shadow 0.2s, border-color 0.2s;
+}
+
+.odoo-module-page__feature:hover {
+  box-shadow: 0 4px 16px rgba(113, 75, 103, 0.1);
+  border-color: rgba(113, 75, 103, 0.2);
 }
 
 .odoo-module-page__feature-icon {
   flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, rgba(1, 126, 132, 0.12), rgba(113, 75, 103, 0.08));
   color: var(--odoo-secondary);
-  opacity: 0.9;
+  border-radius: 10px;
 }
 
 .odoo-module-page__card {
   background: var(--odoo-card-bg);
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06), 0 0 0 1px rgba(0, 0, 0, 0.04);
   border: 1px solid var(--odoo-border);
-  padding: 2rem;
+  padding: 2.25rem 2.5rem;
   text-align: center;
 }
 
 .odoo-module-page__card--cta {
-  padding: 2rem 2.5rem;
+  padding: 2.5rem 2.75rem;
+  border-left: 4px solid var(--odoo-primary);
+  background: linear-gradient(180deg, #ffffff 0%, #fcfbfd 100%);
 }
 
 .odoo-module-page__card--error {
   color: var(--odoo-danger);
+  border-left-color: var(--odoo-danger);
 }
 
 .odoo-module-page__card-text {
-  font-size: 0.9375rem;
+  font-size: 1rem;
   color: var(--odoo-text-muted);
-  margin: 0 0 1.25rem;
-  line-height: 1.5;
+  margin: 0 0 1.5rem;
+  line-height: 1.55;
 }
 
 .odoo-module-page__btn {
   gap: 0.5rem;
   text-decoration: none;
-  font-size: 1rem;
-  padding: 0.875rem 1.75rem;
+  font-size: 1.0625rem;
+  padding: 0.875rem 2rem;
+  border-radius: 10px;
+  box-shadow: 0 4px 14px rgba(113, 75, 103, 0.3);
 }
 
 .odoo-module-page__btn:hover {
   color: white;
+  box-shadow: 0 6px 20px rgba(113, 75, 103, 0.4);
 }
 
 .odoo-module-page__loading {
@@ -297,8 +337,8 @@ body {
   flex-direction: column;
   align-items: center;
   gap: 1rem;
-  padding: 1.5rem;
-  min-height: 140px;
+  padding: 2rem 1.5rem;
+  min-height: 160px;
   justify-content: center;
 }
 
@@ -316,7 +356,9 @@ body {
 .odoo-module-page__hint {
   font-size: 0.8125rem;
   color: var(--odoo-text-muted);
-  margin: 0.75rem 0 0;
+  margin: 1rem 0 0;
+  padding-top: 1rem;
+  border-top: 1px solid var(--odoo-border);
 }
 
 /* Dashboard styles */

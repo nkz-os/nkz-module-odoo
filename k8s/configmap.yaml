@@ -31,6 +31,5 @@ data:
   # Comma-separated origins for CORS. Replace YOUR_DOMAIN with frontend and Odoo hosts.
   ALLOWED_ORIGINS_STR: "https://frontend.YOUR_DOMAIN,https://odoo.YOUR_DOMAIN"
 
-  # Public URL for "Open Odoo" links. Empty = relative paths.
-  # If Odoo is exposed under the API host, use e.g. https://nkz.YOUR_DOMAIN/odoo
-  ODOO_URL: "https://nkz.YOUR_DOMAIN/odoo"
+  # Public URL for "Open Odoo" links. Use subdomain (e.g. https://odoo.YOUR_DOMAIN) when using wildcard TLS.
+  ODOO_URL: "https://odoo.YOUR_DOMAIN"
