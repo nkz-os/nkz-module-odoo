@@ -58,23 +58,24 @@ class JWTAuthMiddleware(BaseHTTPMiddleware):
         if request.method == "OPTIONS":
             return await call_next(request)
 
-        # Get Authorization header
+        # Extract token from Authorization header or httpOnly cookie fallback
+        token = None
         auth_header = request.headers.get("Authorization")
-        if not auth_header:
-            return JSONResponse(
-                status_code=401,
-                content={"detail": "Missing Authorization header"}
-            )
+        if auth_header:
+            try:
+                scheme, token = auth_header.split()
+                if scheme.lower() != "bearer":
+                    token = None
+            except ValueError:
+                token = None
 
-        # Extract token
-        try:
-            scheme, token = auth_header.split()
-            if scheme.lower() != "bearer":
-                raise ValueError("Invalid auth scheme")
-        except ValueError:
+        if not token:
+            token = request.cookies.get("nkz_token")
+
+        if not token:
             return JSONResponse(
                 status_code=401,
-                content={"detail": "Invalid Authorization header format"}
+                content={"detail": "Missing authentication (Bearer token or session cookie)"}
             )
 
         # Validate token

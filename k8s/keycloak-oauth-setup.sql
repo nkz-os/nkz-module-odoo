@@ -1,78 +1,50 @@
 -- =============================================================================
--- Odoo OAuth Provider Setup for Keycloak SSO
+-- Odoo 16 OAuth Provider Setup for Keycloak SSO
 -- =============================================================================
--- This script configures Odoo to use Keycloak as OAuth2/OpenID Connect provider.
--- Execute this AFTER the database is created and auth_oauth module is installed.
+-- Configures Odoo to show "Login with Nekazari" button on the login page.
+-- Execute AFTER auth_oauth module is installed in the target database.
+--
+-- This is already applied to nkz_odoo_template — new tenant DBs cloned from
+-- the template inherit this row automatically. Only run manually if the
+-- provider was deleted or the template was recreated.
 --
 -- USAGE:
--- 1. Replace YOUR_DOMAIN (or AUTH_HOST) with your Keycloak host (e.g. auth.example.com).
--- 2. Execute in the Odoo PostgreSQL database (postgres-odoo-service)
---    for each tenant database: nkz_odoo_{tenant_id}
+--   Replace AUTH_DOMAIN with your Keycloak host (e.g. auth.example.com).
+--   psql -U odoo -d <database> -f keycloak-oauth-setup.sql
 --
 -- PREREQUISITES:
--- 1. Create a Keycloak client for Odoo (see below)
--- 2. Have the client_id ready
+--   1. auth_oauth module installed (odoo -d <db> -i auth_oauth --stop-after-init)
+--   2. Keycloak client "nekazari-odoo" created (see nekazari-odoo-client.json)
 -- =============================================================================
 
--- Insert Keycloak as OAuth Provider
 INSERT INTO auth_oauth_provider (
-    name,
-    flow,
-    client_id,
-    enabled,
-    body,
-    auth_endpoint,
-    scope,
-    validation_endpoint,
-    data_endpoint,
-    css_class,
-    sequence,
-    create_uid,
-    create_date,
-    write_uid,
-    write_date
+    name, client_id, enabled, body,
+    auth_endpoint, scope, validation_endpoint, data_endpoint,
+    css_class, sequence, create_uid, create_date, write_uid, write_date
 ) VALUES (
-    'Nekazari (Keycloak)',                                           -- Provider name
-    'access_token',                                                  -- OAuth flow
-    'nekazari-odoo',                                                 -- Client ID (must match Keycloak client)
-    true,                                                            -- Enabled
-    'Login with Nekazari',                                           -- Button text
-    'https://auth.YOUR_DOMAIN/auth/realms/nekazari/protocol/openid-connect/auth',
-    'openid email profile',                                          -- Scopes
-    'https://auth.YOUR_DOMAIN/auth/realms/nekazari/protocol/openid-connect/token/introspect',
-    'https://auth.YOUR_DOMAIN/auth/realms/nekazari/protocol/openid-connect/userinfo',
-    'fa fa-fw fa-sign-in text-primary',                              -- CSS class for button
-    10,                                                              -- Sequence (order in login page)
-    1,                                                               -- create_uid (admin)
-    NOW(),
-    1,                                                               -- write_uid
-    NOW()
+    'Nekazari (Keycloak)',
+    'nekazari-odoo',
+    true,
+    '"Login with Nekazari"'::jsonb,
+    'https://AUTH_DOMAIN/auth/realms/nekazari/protocol/openid-connect/auth',
+    'openid email profile',
+    -- validation uses userinfo (works with public clients; introspect needs client_secret)
+    'https://AUTH_DOMAIN/auth/realms/nekazari/protocol/openid-connect/userinfo',
+    'https://AUTH_DOMAIN/auth/realms/nekazari/protocol/openid-connect/userinfo',
+    'fa fa-fw fa-sign-in text-primary',
+    10, 1, NOW(), 1, NOW()
 ) ON CONFLICT DO NOTHING;
 
 -- =============================================================================
--- KEYCLOAK CLIENT CONFIGURATION
+-- NOTES (Odoo 16 specific):
 -- =============================================================================
--- Create a client in Keycloak with these settings:
---
--- Client ID: nekazari-odoo
--- Client Protocol: openid-connect
--- Access Type: confidential (or public for simpler setup)
--- Valid Redirect URIs:
---   - https://odoo.YOUR_DOMAIN/*
---   - https://frontend.YOUR_DOMAIN/modules/odoo-erp/*
--- Web Origins:
---   - https://odoo.YOUR_DOMAIN
---   - https://frontend.YOUR_DOMAIN
---
--- Mappers (add these to include user info in token):
--- 1. email -> claim name: email
--- 2. given name -> claim name: name (or create full name mapper)
---
--- =============================================================================
--- NOTES:
--- =============================================================================
--- 1. The client_id must match exactly what's configured in Keycloak
--- 2. For production, use 'access_token_api' flow with client secret
--- 3. Users logging in via OAuth will be auto-created in Odoo
--- 4. To link existing users: match by email
+-- 1. Odoo 16 does NOT have a "flow" column (added in v17). Remove it if
+--    migrating this SQL from a v17+ reference.
+-- 2. The "body" column is jsonb — value must be a valid JSON string literal.
+-- 3. validation_endpoint: we use /userinfo instead of /token/introspect because
+--    introspection requires client authentication (client_id + client_secret as
+--    Basic Auth). The userinfo endpoint accepts a Bearer access_token directly,
+--    which is what Odoo sends in the access_token flow.
+-- 4. Users logging in via OAuth are auto-created in Odoo with minimal rights.
+--    To grant admin access, manually assign the "Settings" group in Odoo.
 -- =============================================================================
