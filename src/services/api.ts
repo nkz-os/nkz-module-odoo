@@ -81,76 +81,32 @@ class OdooApiClient {
     return '/api/odoo';
   }
 
+  // Auth is handled via httpOnly cookie (credentials: 'include').
+  // getToken returns null — kept for getTenantId backward compat.
   private getToken(): string | null {
-    if (typeof window === 'undefined') return null;
-
-    // 1. Try Keycloak instance (same as working vegetation-health module)
-    const keycloakInstance = (window as any).keycloak;
-    if (keycloakInstance?.token) {
-      return keycloakInstance.token;
-    }
-
-    // 2. Try __nekazariAuthContext
-    const authContext = (window as any).__nekazariAuthContext;
-    if (authContext) {
-      const token = typeof authContext.getToken === 'function' 
-        ? authContext.getToken() 
-        : authContext.token;
-      if (token) return token;
-    }
-
-    // 3. Fallback to localStorage
-    return localStorage.getItem('nkz_token') || localStorage.getItem('auth_token');
+    return null;
   }
 
   private getTenantId(): string | null {
     if (typeof window === 'undefined') return null;
-
-    // 1. Try __nekazariAuthContext
     const authContext = (window as any).__nekazariAuthContext;
-    if (authContext?.tenantId) {
-      return authContext.tenantId;
-    }
-
-    // 2. Try to extract from token
-    const token = this.getToken();
-    if (token) {
-      try {
-        const base64Url = token.split('.')[1];
-        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-        const jsonPayload = decodeURIComponent(
-          window.atob(base64)
-            .split('')
-            .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
-            .join('')
-        );
-        const decoded = JSON.parse(jsonPayload);
-        const tenantId = decoded['tenant-id'] || decoded.tenant_id || decoded.tenantId || decoded.tenant;
-        if (tenantId) return tenantId;
-      } catch (e) {
-        console.warn('[OdooApi] Failed to decode token for tenant', e);
-      }
-    }
-
-    // 3. Fallback to localStorage
-    return localStorage.getItem('nkz_tenant_id');
+    return authContext?.tenantId ?? null;
   }
 
   private async request<T>(
     endpoint: string,
     options: RequestInit = {}
   ): Promise<T> {
-    const token = this.getToken();
     const tenantId = this.getTenantId();
 
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
-      ...(token && { 'Authorization': `Bearer ${token}` }),
       ...(tenantId && { 'X-Tenant-ID': tenantId })
     };
 
     const response = await fetch(`${this.baseUrl}${endpoint}`, {
       ...options,
+      credentials: 'include',
       headers: {
         ...headers,
         ...(options.headers || {})
