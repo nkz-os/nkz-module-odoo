@@ -73,11 +73,13 @@ RUN mkdir -p /tmp/wheels /tmp/extracted && \
     pip3 download --no-deps --dest /tmp/wheels \
         --python-version 3.10 --only-binary=:all: \
         odoo-addon-community-maps==16.0.2.0.0 \
+        odoo-addon-community-maps-key-submissions==16.0.1.0.1.1 \
         odoo-addon-metadata==16.0.1.0.0 \
         odoo-addon-crm-metadata==16.0.0.1.0 \
         odoo-addon-crm-metadata-rest-api==16.0.0.1.0 \
         odoo-addon-crm-rest-api==16.0.0.1.0 \
         odoo-addon-l10n-es-cooperator==16.0.1.0.0.4 \
+        odoo-addon-sale-order-metadata==16.0.1.0.0 \
     && for whl in /tmp/wheels/*.whl; do \
         unzip -o -q "$whl" "odoo/addons/*" -d /tmp/extracted; \
     done \
