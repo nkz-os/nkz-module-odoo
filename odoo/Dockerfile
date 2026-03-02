@@ -35,7 +35,18 @@ RUN pip3 install --no-cache-dir \
     pydantic \
     extendable \
     marshmallow \
-    cachetools
+    cachetools \
+    cerberus \
+    pyquerystring \
+    jsondiff \
+    apispec \
+    parse-accept-language \
+    pyjwt \
+    openpyxl \
+    pycountry \
+    python-dateutil \
+    itsdangerous \
+    faker
 
 # OCA addons via git clone (PyPI requires Python >=3.10, base image has 3.9).
 # Clone each OCA repo at 16.0 branch and copy all addons (with __manifest__.py)
@@ -73,11 +84,19 @@ RUN mkdir -p /opt/odoo/oca-addons /tmp/oca && cd /tmp/oca && \
 
 # Coopdevs-specific modules not in standard OCA repos.
 # Download PyPI wheels (bypassing Python >=3.10 check) and extract addon dirs.
+# community_maps from somitcoop GitLab (PyPI wheels have version mismatches)
+RUN git clone --depth 1 -b 16.0 \
+        https://gitlab.com/somitcoop/erp-research/community-maps.git \
+        /tmp/cmaps && \
+    for mod in /tmp/cmaps/*/; do \
+        [ -f "$mod/__manifest__.py" ] && cp -r "$mod" /opt/odoo/oca-addons/; \
+    done && \
+    rm -rf /tmp/cmaps
+
+# Other Coopdevs-specific modules via PyPI wheels
 RUN mkdir -p /tmp/wheels /tmp/extracted && \
     pip3 download --no-deps --dest /tmp/wheels \
         --python-version 3.10 --only-binary=:all: \
-        odoo-addon-community-maps==16.0.2.0.0 \
-        odoo-addon-community-maps-key-submissions==16.0.1.0.1.1 \
         odoo-addon-metadata==16.0.1.0.0 \
         odoo-addon-crm-metadata==16.0.0.1.0 \
         odoo-addon-crm-metadata-rest-api==16.0.0.1.0 \
@@ -100,6 +119,25 @@ RUN mkdir -p /opt/odoo/custom-addons && \
         case "$basename" in energy_*|community_*) cp -r "$mod" /opt/odoo/custom-addons/ ;; esac; \
     done && \
     rm -rf /tmp/odoo-ce
+
+# Fix energy_communities/hooks.py: api.Environment.manage() was removed in Odoo 16
+RUN printf '%s\n' \
+    'import logging' \
+    '' \
+    'from odoo import SUPERUSER_ID, api' \
+    '' \
+    '_logger = logging.getLogger(__name__)' \
+    '' \
+    '__all__ = ["post_init_hook"]' \
+    '' \
+    '' \
+    'def post_init_hook(cr, rule_ref):' \
+    '    env = api.Environment(cr, SUPERUSER_ID, {})' \
+    '    instance_company = env.ref("base.main_company")' \
+    '    instance_company.write({"hierarchy_level": "instance", "parent_id": False})' \
+    '    coordinator_companies = instance_company.child_ids' \
+    '    coordinator_companies.write({"hierarchy_level": "coordinator"})' \
+    > /opt/odoo/custom-addons/energy_communities/hooks.py
 
 COPY addons/nekazari_connector /opt/odoo/custom-addons/nekazari_connector
 
