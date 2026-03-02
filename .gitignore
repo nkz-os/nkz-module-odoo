@@ -18,6 +18,7 @@ DEPLOY-ODOO-HARDENING.md
 *.pem
 *.key
 secrets.yaml
+*-secret.yaml
 !k8s/secrets.yaml  # Template is OK
 
 # =============================================================================

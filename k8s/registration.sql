@@ -62,7 +62,6 @@ INSERT INTO marketplace_modules (
         "color": "#714B67",
         "shortDescription": "Multitenant Odoo ERP for farm and energy management",
         "lifecycle_webhook_url": "http://odoo-backend-service/api/odoo/internal/lifecycle",
-        "lifecycle_webhook_secret": "REDACTED_SECRET_ROTATED",
         "features": [
             "Multitenant Odoo ERP (one DB per tenant)",
             "Farm management (products, parcels, harvests)",
