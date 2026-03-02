@@ -63,32 +63,21 @@ RUN mkdir -p /opt/odoo/oca-addons /tmp/oca && cd /tmp/oca && \
     rm -rf /tmp/oca
 
 # Coopdevs-specific modules not in standard OCA repos.
-# Download PyPI wheels (bypassing Python version check) and extract addon dirs.
+# Download PyPI wheels (bypassing Python >=3.10 check) and extract addon dirs.
 RUN mkdir -p /tmp/wheels /tmp/extracted && \
     pip3 download --no-deps --dest /tmp/wheels \
-        --python-version 3.10 --implementation cp --abi none --platform any \
+        --python-version 3.10 --only-binary=:all: \
         odoo-addon-community-maps==16.0.2.0.0 \
         odoo-addon-metadata==16.0.1.0.0 \
         odoo-addon-crm-metadata==16.0.0.1.0 \
         odoo-addon-crm-metadata-rest-api==16.0.0.1.0 \
         odoo-addon-crm-rest-api==16.0.0.1.0 \
         odoo-addon-l10n-es-cooperator==16.0.1.0.0.4 \
-        odoo-addon-sale-order-metadata==16.0.1.0.0 \
     && for whl in /tmp/wheels/*.whl; do \
-        unzip -q "$whl" -d /tmp/extracted; \
+        unzip -o -q "$whl" "odoo/addons/*" -d /tmp/extracted; \
     done \
-    && cp -r /tmp/extracted/odoo/addons/*/ /opt/odoo/oca-addons/ 2>/dev/null || true \
+    && cp -r /tmp/extracted/odoo/addons/* /opt/odoo/oca-addons/ \
     && rm -rf /tmp/wheels /tmp/extracted
-
-# Coopdevs community-maps (key_submissions might be in the same repo)
-RUN git clone --depth 1 -b 16.0 \
-        https://gitlab.com/coopdevs/community-maps-builder-backend.git \
-        /tmp/cmaps 2>/dev/null \
-    && for mod in /tmp/cmaps/*/; do \
-        [ -f "$mod/__manifest__.py" ] && cp -r "$mod" /opt/odoo/oca-addons/; \
-    done \
-    && rm -rf /tmp/cmaps \
-    || echo "Warning: community-maps repo not cloned (not critical)"
 
 # Coopdevs energy community modules
 RUN mkdir -p /opt/odoo/custom-addons && \
