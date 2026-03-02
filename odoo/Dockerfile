@@ -20,13 +20,17 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Bootstrap a fresh pip without touching system pyOpenSSL (which Odoo needs).
 RUN curl -sS https://bootstrap.pypa.io/get-pip.py | python3 - --no-cache-dir
 
-# Python deps required by energy modules and OCA addons
+# Python deps required by energy modules and OCA addons.
+# CRITICAL: pin cryptography<4 to preserve compatibility with system pyOpenSSL
+# (Odoo's urllib3 imports from cryptography.hazmat.backends.openssl.x509 which
+# was removed in cryptography >=37).
 RUN pip3 install --no-cache-dir \
+    "cryptography>=3.3,<4" \
     pandas>=2.0.3 \
     numpy>=1.24.4 \
     openupgradelib>=3.12.0 \
     python-keycloak \
-    python-jose[cryptography] \
+    python-jose \
     python-slugify==8.0.1 \
     pydantic \
     extendable \
