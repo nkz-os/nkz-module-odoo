@@ -13,27 +13,28 @@ FROM odoo:16.0
 USER root
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    git build-essential libffi-dev \
+    git build-essential libffi-dev unzip \
     && rm -rf /var/lib/apt/lists/*
 
 # Fix broken pip in Odoo 16 base image (pyOpenSSL incompatibility)
 RUN pip3 install --no-cache-dir --upgrade pip setuptools wheel pyOpenSSL
 
-# Python deps required by energy modules
+# Python deps required by energy modules and OCA addons
 RUN pip3 install --no-cache-dir \
     pandas>=2.0.3 \
     numpy>=1.24.4 \
     openupgradelib>=3.12.0 \
     python-keycloak \
     python-jose[cryptography] \
-    python-slugify \
-    pydantic
+    python-slugify==8.0.1 \
+    pydantic \
+    extendable \
+    marshmallow
 
 # OCA addons via git clone (PyPI requires Python >=3.10, base image has 3.9).
-# We clone each OCA repo at 16.0 branch and copy all addons into a flat directory.
-# /mnt/extra-addons is declared as VOLUME in the base image and gets wiped at runtime.
-RUN mkdir -p /opt/odoo/oca-addons /tmp/oca && \
-    cd /tmp/oca && \
+# Clone each OCA repo at 16.0 branch and copy all addons (with __manifest__.py)
+# to a flat directory. /mnt/extra-addons is a VOLUME and gets wiped at runtime.
+RUN mkdir -p /opt/odoo/oca-addons /tmp/oca && cd /tmp/oca && \
     git clone --depth 1 -b 16.0 https://github.com/OCA/contract.git && \
     git clone --depth 1 -b 16.0 https://github.com/OCA/queue.git && \
     git clone --depth 1 -b 16.0 https://github.com/OCA/rest-framework.git && \
@@ -54,13 +55,40 @@ RUN mkdir -p /opt/odoo/oca-addons /tmp/oca && \
     git clone --depth 1 -b 16.0 https://github.com/OCA/bank-statement-import.git && \
     git clone --depth 1 -b 16.0 https://github.com/OCA/cooperative.git && \
     git clone --depth 1 -b 16.0 https://github.com/OCA/mis-builder.git && \
-    git clone --depth 1 -b 16.0 https://github.com/OCA/community-data-ownership.git && \
     for repo in /tmp/oca/*/; do \
         for mod in "$repo"*/; do \
             [ -f "$mod/__manifest__.py" ] && cp -r "$mod" /opt/odoo/oca-addons/; \
         done; \
     done && \
     rm -rf /tmp/oca
+
+# Coopdevs-specific modules not in standard OCA repos.
+# Download PyPI wheels (bypassing Python version check) and extract addon dirs.
+RUN mkdir -p /tmp/wheels /tmp/extracted && \
+    pip3 download --no-deps --dest /tmp/wheels \
+        --python-version 3.10 --implementation cp --abi none --platform any \
+        odoo-addon-community-maps==16.0.2.0.0 \
+        odoo-addon-metadata==16.0.1.0.0 \
+        odoo-addon-crm-metadata==16.0.0.1.0 \
+        odoo-addon-crm-metadata-rest-api==16.0.0.1.0 \
+        odoo-addon-crm-rest-api==16.0.0.1.0 \
+        odoo-addon-l10n-es-cooperator==16.0.1.0.0.4 \
+        odoo-addon-sale-order-metadata==16.0.1.0.0 \
+    && for whl in /tmp/wheels/*.whl; do \
+        unzip -q "$whl" -d /tmp/extracted; \
+    done \
+    && cp -r /tmp/extracted/odoo/addons/*/ /opt/odoo/oca-addons/ 2>/dev/null || true \
+    && rm -rf /tmp/wheels /tmp/extracted
+
+# Coopdevs community-maps (key_submissions might be in the same repo)
+RUN git clone --depth 1 -b 16.0 \
+        https://gitlab.com/coopdevs/community-maps-builder-backend.git \
+        /tmp/cmaps 2>/dev/null \
+    && for mod in /tmp/cmaps/*/; do \
+        [ -f "$mod/__manifest__.py" ] && cp -r "$mod" /opt/odoo/oca-addons/; \
+    done \
+    && rm -rf /tmp/cmaps \
+    || echo "Warning: community-maps repo not cloned (not critical)"
 
 # Coopdevs energy community modules
 RUN mkdir -p /opt/odoo/custom-addons && \
