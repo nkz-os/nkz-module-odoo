@@ -12,18 +12,18 @@
         </xpath>
     </template>
 
-    <!-- ═══ Login page: replace company logo with Nekazari logo ══════════ -->
-    <template id="nekazari_login_logo" inherit_id="web.login_layout" name="Nekazari Login Logo">
-        <!-- Replace the company logo image with the Nekazari SVG logo -->
-        <xpath expr="//img[contains(@t-attf-src, 'company_logo')]" position="replace">
-            <img src="/nekazari_web_theme/static/src/img/nekazari_logo.svg"
-                 alt="Nekazari" style="max-height:80px; max-width:100%; width:auto"/>
-        </xpath>
-        <!-- Replace "Powered by Odoo" footer with "Powered by Nekazari" -->
-        <xpath expr="//a[contains(@href, 'odoo.com')]" position="replace">
-            <a href="https://nekazari.robotika.cloud" target="_blank">
-                Powered by <span>Nekazari</span>
-            </a>
+    <!-- ═══ Replace "Powered by Odoo" branding with Nekazari ═════════════ -->
+    <template id="nekazari_brand_promotion" inherit_id="web.brand_promotion_message"
+              name="Nekazari Brand Promotion">
+        <xpath expr="." position="replace">
+            <t t-set="nekazari_link">
+                <a target="_blank" href="https://nekazari.robotika.cloud"
+                   class="badge text-bg-light">
+                    Nekazari
+                </a>
+            </t>
+            <t t-set="final_message">Powered by %s</t>
+            <t t-out="final_message % (nekazari_link,)"/>
         </xpath>
     </template>
 
