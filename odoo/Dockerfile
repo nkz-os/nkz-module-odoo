@@ -1,6 +1,7 @@
 # Nekazari Odoo ERP Module - Odoo 16.0 Dockerfile
 #
-# Based on official Odoo 16.0 with Som Comunitats energy modules.
+# Based on official Odoo 16.0 with Som Comunitats energy modules
+# and OCA dependencies.
 #
 # Author: Kate Benetis <kate@robotika.cloud>
 # Company: Robotika
@@ -8,47 +9,70 @@
 
 FROM odoo:16.0
 
-# Switch to root for installation
 USER root
 
-# Install additional system dependencies
+# System deps for building Python packages and git for cloning repos
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    git \
+    git build-essential libffi-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Create custom addons directory
-RUN mkdir -p /mnt/extra-addons/nekazari_connector \
-    && mkdir -p /mnt/extra-addons/som_comunitats
+# Python deps required by energy modules
+RUN pip3 install --no-cache-dir \
+    pandas>=2.0.3 \
+    numpy>=1.24.4 \
+    openupgradelib>=3.12.0 \
+    python-keycloak \
+    python-jose[cryptography]
 
-# Clone Som Comunitats energy modules from Coopdevs
-# Note: These are the energy community modules from git.coopdevs.org
-RUN git clone --depth 1 --branch 16.0 \
-    https://git.coopdevs.org/coopdevs/comunitats-energetiques/odoo-ce.git \
-    /tmp/odoo-ce \
-    && cp -r /tmp/odoo-ce/energy_* /mnt/extra-addons/som_comunitats/ \
-    && rm -rf /tmp/odoo-ce \
-    || echo "Warning: Could not clone Som Comunitats modules"
+# OCA dependencies (pip installs them into odoo/addons/ in the Python path,
+# which is already in addons_path via /usr/lib/python3/dist-packages/odoo/addons)
+RUN pip3 install --no-cache-dir \
+    odoo-addon-contract==16.0.* \
+    odoo-addon-queue-job==16.0.* \
+    odoo-addon-base-rest==16.0.* \
+    odoo-addon-auth-api-key==16.0.* \
+    odoo-addon-auth-oidc==16.0.* \
+    odoo-addon-base-user-role==16.0.* \
+    odoo-addon-account-banking-mandate==16.0.* \
+    odoo-addon-account-payment-order==16.0.* \
+    odoo-addon-web-m2x-options==16.0.* \
+    odoo-addon-report-csv==16.0.* \
+    odoo-addon-l10n-es-aeat==16.0.* \
+    || echo "Warning: Some OCA packages may not be available on PyPI"
 
-# Copy custom Nekazari connector module
+# Contract sub-modules (depend on base contract, install after)
+RUN pip3 install --no-cache-dir \
+    odoo-addon-contract-mandate==16.0.* \
+    odoo-addon-contract-variable-quantity==16.0.* \
+    || echo "Warning: Some contract sub-modules not available"
+
+# Coopdevs energy community modules (Odoo CE)
+RUN mkdir -p /mnt/extra-addons && \
+    git clone --depth 1 --branch 16.0 \
+        https://git.coopdevs.org/coopdevs/comunitats-energetiques/odoo-ce.git \
+        /tmp/odoo-ce && \
+    for mod in /tmp/odoo-ce/energy_* /tmp/odoo-ce/community_*; do \
+        [ -d "$mod" ] && cp -r "$mod" /mnt/extra-addons/; \
+    done && \
+    rm -rf /tmp/odoo-ce
+
+# Custom Nekazari connector module
 COPY addons/nekazari_connector /mnt/extra-addons/nekazari_connector
 
-# Copy Odoo configuration
+# Odoo configuration
 COPY odoo.conf /etc/odoo/odoo.conf
 
-# Copy entrypoint script
+# Custom entrypoint
 COPY entrypoint.sh /entrypoint-nkz.sh
 RUN chmod +x /entrypoint-nkz.sh
 
-# Set proper permissions
+# Permissions
 RUN chown -R odoo:odoo /mnt/extra-addons \
     && chown odoo:odoo /etc/odoo/odoo.conf
 
-# Switch back to odoo user
 USER odoo
 
-# Expose Odoo ports
 EXPOSE 8069 8071 8072
 
-# Use custom entrypoint
 ENTRYPOINT ["/entrypoint-nkz.sh"]
 CMD ["odoo"]

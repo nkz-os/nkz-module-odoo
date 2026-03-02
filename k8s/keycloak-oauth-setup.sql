@@ -25,7 +25,7 @@ INSERT INTO auth_oauth_provider (
     'Nekazari (Keycloak)',
     'nekazari-odoo',
     true,
-    '"Login with Nekazari"'::jsonb,
+    '{"en_US": "Login with Nekazari", "es_ES": "Iniciar sesión con Nekazari"}'::jsonb,
     'https://AUTH_DOMAIN/auth/realms/nekazari/protocol/openid-connect/auth',
     'openid email profile',
     -- validation uses userinfo (works with public clients; introspect needs client_secret)
