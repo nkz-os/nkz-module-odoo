@@ -51,9 +51,11 @@ RUN mkdir -p /mnt/extra-addons && \
     git clone --depth 1 --branch 16.0 \
         https://git.coopdevs.org/coopdevs/comunitats-energetiques/odoo-ce.git \
         /tmp/odoo-ce && \
-    for mod in /tmp/odoo-ce/energy_* /tmp/odoo-ce/community_*; do \
-        [ -d "$mod" ] && cp -r "$mod" /mnt/extra-addons/; \
+    for mod in /tmp/odoo-ce/*/; do \
+        basename="$(basename "$mod")" && \
+        case "$basename" in energy_*|community_*) cp -r "$mod" /mnt/extra-addons/ ;; esac; \
     done && \
+    ls /mnt/extra-addons/ && \
     rm -rf /tmp/odoo-ce
 
 # Custom Nekazari connector module
