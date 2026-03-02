@@ -79,7 +79,7 @@ RUN mkdir -p /tmp/wheels /tmp/extracted && \
         odoo-addon-crm-metadata-rest-api==16.0.0.1.0 \
         odoo-addon-crm-rest-api==16.0.0.1.0 \
         odoo-addon-l10n-es-cooperator==16.0.1.0.0.4 \
-        odoo-addon-sale-order-metadata==16.0.1.0.0 \
+        odoo-addon-sale-order-metadata==16.0.0.1.0 \
     && for whl in /tmp/wheels/*.whl; do \
         unzip -o -q "$whl" "odoo/addons/*" -d /tmp/extracted; \
     done \
