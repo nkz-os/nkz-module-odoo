@@ -42,6 +42,7 @@ class JWTAuthMiddleware(BaseHTTPMiddleware):
         "/api/odoo/health",
         "/api/odoo/webhook/ngsi",  # NGSI-LD subscriptions (validated differently)
         "/api/odoo/webhook/n8n",   # N8N webhooks (validated by secret)
+        "/api/odoo/internal/lifecycle",  # Module lifecycle (validated by HMAC)
         "/docs",
         "/redoc",
         "/openapi.json"

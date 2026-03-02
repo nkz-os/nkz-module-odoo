@@ -128,6 +128,11 @@ spec:
                 configMapKeyRef:
                   name: odoo-config
                   key: ODOO_URL
+            - name: LIFECYCLE_WEBHOOK_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: module-lifecycle-secret
+                  key: LIFECYCLE_WEBHOOK_SECRET
           resources:
             requests:
               memory: "256Mi"

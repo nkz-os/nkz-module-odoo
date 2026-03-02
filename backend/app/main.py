@@ -14,7 +14,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import logging
 
 from app.config import settings
-from app.routers import tenant, sync, webhook, health
+from app.routers import tenant, sync, webhook, health, lifecycle
 from app.middleware.auth import JWTAuthMiddleware
 
 # Configure logging
@@ -88,6 +88,7 @@ app.include_router(health.router, prefix="/api/odoo", tags=["Health"])
 app.include_router(tenant.router, prefix="/api/odoo/tenant", tags=["Tenant Management"])
 app.include_router(sync.router, prefix="/api/odoo/sync", tags=["Synchronization"])
 app.include_router(webhook.router, prefix="/api/odoo/webhook", tags=["Webhooks"])
+app.include_router(lifecycle.router, prefix="/api/odoo", tags=["Lifecycle"])
 
 
 @app.get("/")
