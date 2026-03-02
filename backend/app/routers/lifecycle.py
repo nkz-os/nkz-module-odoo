@@ -155,7 +155,7 @@ async def _handle_enable(event: LifecycleEvent) -> dict:
             "energy_modules_enabled": True,
             "installed_modules": energy_modules,
             "admin_email": admin_email,
-            "created_at": datetime.utcnow().isoformat(),
+            "created_at": datetime.utcnow(),
         })
 
         # Register NGSI-LD subscriptions
