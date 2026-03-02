@@ -16,8 +16,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     git build-essential libffi-dev unzip \
     && rm -rf /var/lib/apt/lists/*
 
-# Fix broken pip in Odoo 16 base image (pyOpenSSL incompatibility)
-RUN pip3 install --no-cache-dir --upgrade pip setuptools wheel pyOpenSSL
+# The system pip (20.3.4) is broken due to pyOpenSSL/cryptography mismatch.
+# Bootstrap a fresh pip without touching system pyOpenSSL (which Odoo needs).
+RUN curl -sS https://bootstrap.pypa.io/get-pip.py | python3 - --no-cache-dir
 
 # Python deps required by energy modules and OCA addons
 RUN pip3 install --no-cache-dir \
