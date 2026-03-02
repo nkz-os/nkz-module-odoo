@@ -34,7 +34,8 @@ RUN pip3 install --no-cache-dir \
     python-slugify==8.0.1 \
     pydantic \
     extendable \
-    marshmallow
+    marshmallow \
+    cachetools
 
 # OCA addons via git clone (PyPI requires Python >=3.10, base image has 3.9).
 # Clone each OCA repo at 16.0 branch and copy all addons (with __manifest__.py)
@@ -54,6 +55,9 @@ RUN mkdir -p /opt/odoo/oca-addons /tmp/oca && cd /tmp/oca && \
     git clone --depth 1 -b 16.0 https://github.com/OCA/reporting-engine.git && \
     git clone --depth 1 -b 16.0 https://github.com/OCA/social.git && \
     git clone --depth 1 -b 16.0 https://github.com/OCA/connector.git && \
+    git clone --depth 1 -b 16.0 https://github.com/OCA/account-invoicing.git && \
+    git clone --depth 1 -b 16.0 https://github.com/OCA/sale-workflow.git && \
+    git clone --depth 1 -b 16.0 https://github.com/OCA/server-tools.git && \
     git clone --depth 1 -b 16.0 https://github.com/OCA/account-financial-tools.git && \
     git clone --depth 1 -b 16.0 https://github.com/OCA/account-reconcile.git && \
     git clone --depth 1 -b 16.0 https://github.com/OCA/account-financial-reporting.git && \
