@@ -77,7 +77,7 @@ RUN mkdir -p /opt/odoo/oca-addons /tmp/oca && cd /tmp/oca && \
     git clone --depth 1 -b 16.0 https://github.com/OCA/mis-builder.git && \
     for repo in /tmp/oca/*/; do \
         for mod in "$repo"*/; do \
-            [ -f "$mod/__manifest__.py" ] && cp -r "$mod" /opt/odoo/oca-addons/; \
+            [ -f "$mod/__manifest__.py" ] && cp -r "$mod" /opt/odoo/oca-addons/ || true; \
         done; \
     done && \
     rm -rf /tmp/oca
@@ -89,7 +89,7 @@ RUN git clone --depth 1 -b 16.0 \
         https://gitlab.com/somitcoop/erp-research/community-maps.git \
         /tmp/cmaps && \
     for mod in /tmp/cmaps/*/; do \
-        [ -f "$mod/__manifest__.py" ] && cp -r "$mod" /opt/odoo/oca-addons/; \
+        [ -f "$mod/__manifest__.py" ] && cp -r "$mod" /opt/odoo/oca-addons/ || true; \
     done && \
     rm -rf /tmp/cmaps
 
