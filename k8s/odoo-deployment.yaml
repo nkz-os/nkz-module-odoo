@@ -31,7 +31,7 @@ spec:
       containers:
         - name: odoo
           image: ghcr.io/k8-benetis/nkz-module-odoo/odoo:latest
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           ports:
             - name: http
               containerPort: 8069
@@ -71,8 +71,6 @@ spec:
           volumeMounts:
             - name: odoo-data
               mountPath: /var/lib/odoo
-            - name: odoo-addons
-              mountPath: /mnt/extra-addons
             - name: odoo-server-config
               mountPath: /etc/odoo/odoo.conf
               subPath: odoo.conf
@@ -94,8 +92,6 @@ spec:
         - name: odoo-data
           persistentVolumeClaim:
             claimName: odoo-data-pvc
-        - name: odoo-addons
-          emptyDir: {}
         - name: odoo-server-config
           configMap:
             name: odoo-server-config
