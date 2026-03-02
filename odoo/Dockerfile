@@ -16,6 +16,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     git build-essential libffi-dev \
     && rm -rf /var/lib/apt/lists/*
 
+# Fix broken pip in Odoo 16 base image (pyOpenSSL incompatibility)
+RUN pip3 install --no-cache-dir --upgrade pip setuptools wheel pyOpenSSL
+
 # Python deps required by energy modules
 RUN pip3 install --no-cache-dir \
     pandas>=2.0.3 \
@@ -46,20 +49,21 @@ RUN pip3 install --no-cache-dir \
     odoo-addon-contract-variable-quantity==16.0.* \
     || echo "Warning: Some contract sub-modules not available"
 
-# Coopdevs energy community modules (Odoo CE)
-RUN mkdir -p /mnt/extra-addons && \
+# /mnt/extra-addons is declared as VOLUME in the base Odoo image,
+# so anything written there during build is lost at runtime.
+# We use /opt/odoo/custom-addons instead.
+RUN mkdir -p /opt/odoo/custom-addons && \
     git clone --depth 1 --branch 16.0 \
         https://git.coopdevs.org/coopdevs/comunitats-energetiques/odoo-ce.git \
         /tmp/odoo-ce && \
     for mod in /tmp/odoo-ce/*/; do \
         basename="$(basename "$mod")" && \
-        case "$basename" in energy_*|community_*) cp -r "$mod" /mnt/extra-addons/ ;; esac; \
+        case "$basename" in energy_*|community_*) cp -r "$mod" /opt/odoo/custom-addons/ ;; esac; \
     done && \
-    ls /mnt/extra-addons/ && \
+    ls /opt/odoo/custom-addons/ && \
     rm -rf /tmp/odoo-ce
 
-# Custom Nekazari connector module
-COPY addons/nekazari_connector /mnt/extra-addons/nekazari_connector
+COPY addons/nekazari_connector /opt/odoo/custom-addons/nekazari_connector
 
 # Odoo configuration
 COPY odoo.conf /etc/odoo/odoo.conf
@@ -69,7 +73,7 @@ COPY entrypoint.sh /entrypoint-nkz.sh
 RUN chmod +x /entrypoint-nkz.sh
 
 # Permissions
-RUN chown -R odoo:odoo /mnt/extra-addons \
+RUN chown -R odoo:odoo /opt/odoo/custom-addons \
     && chown odoo:odoo /etc/odoo/odoo.conf
 
 USER odoo
