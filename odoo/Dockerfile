@@ -1,7 +1,8 @@
 # Nekazari Odoo ERP Module - Odoo 16.0 Dockerfile
 #
-# Based on official Odoo 16.0 with Som Comunitats energy modules
-# and OCA dependencies.
+# Based on official Odoo 16.0 with Som Comunitats energy community modules
+# and OCA dependencies cloned via git (PyPI packages require Python >=3.10
+# but the base image ships Python 3.9).
 #
 # Author: Kate Benetis <kate@robotika.cloud>
 # Company: Robotika
@@ -11,7 +12,6 @@ FROM odoo:16.0
 
 USER root
 
-# System deps for building Python packages and git for cloning repos
 RUN apt-get update && apt-get install -y --no-install-recommends \
     git build-essential libffi-dev \
     && rm -rf /var/lib/apt/lists/*
@@ -25,33 +25,44 @@ RUN pip3 install --no-cache-dir \
     numpy>=1.24.4 \
     openupgradelib>=3.12.0 \
     python-keycloak \
-    python-jose[cryptography]
+    python-jose[cryptography] \
+    python-slugify \
+    pydantic
 
-# OCA dependencies (pip installs them into odoo/addons/ in the Python path,
-# which is already in addons_path via /usr/lib/python3/dist-packages/odoo/addons)
-RUN pip3 install --no-cache-dir \
-    odoo-addon-contract==16.0.* \
-    odoo-addon-queue-job==16.0.* \
-    odoo-addon-base-rest==16.0.* \
-    odoo-addon-auth-api-key==16.0.* \
-    odoo-addon-auth-oidc==16.0.* \
-    odoo-addon-base-user-role==16.0.* \
-    odoo-addon-account-banking-mandate==16.0.* \
-    odoo-addon-account-payment-order==16.0.* \
-    odoo-addon-web-m2x-options==16.0.* \
-    odoo-addon-report-csv==16.0.* \
-    odoo-addon-l10n-es-aeat==16.0.* \
-    || echo "Warning: Some OCA packages may not be available on PyPI"
+# OCA addons via git clone (PyPI requires Python >=3.10, base image has 3.9).
+# We clone each OCA repo at 16.0 branch and copy all addons into a flat directory.
+# /mnt/extra-addons is declared as VOLUME in the base image and gets wiped at runtime.
+RUN mkdir -p /opt/odoo/oca-addons /tmp/oca && \
+    cd /tmp/oca && \
+    git clone --depth 1 -b 16.0 https://github.com/OCA/contract.git && \
+    git clone --depth 1 -b 16.0 https://github.com/OCA/queue.git && \
+    git clone --depth 1 -b 16.0 https://github.com/OCA/rest-framework.git && \
+    git clone --depth 1 -b 16.0 https://github.com/OCA/server-auth.git && \
+    git clone --depth 1 -b 16.0 https://github.com/OCA/server-backend.git && \
+    git clone --depth 1 -b 16.0 https://github.com/OCA/server-ux.git && \
+    git clone --depth 1 -b 16.0 https://github.com/OCA/bank-payment.git && \
+    git clone --depth 1 -b 16.0 https://github.com/OCA/l10n-spain.git && \
+    git clone --depth 1 -b 16.0 https://github.com/OCA/multi-company.git && \
+    git clone --depth 1 -b 16.0 https://github.com/OCA/partner-contact.git && \
+    git clone --depth 1 -b 16.0 https://github.com/OCA/web.git && \
+    git clone --depth 1 -b 16.0 https://github.com/OCA/reporting-engine.git && \
+    git clone --depth 1 -b 16.0 https://github.com/OCA/social.git && \
+    git clone --depth 1 -b 16.0 https://github.com/OCA/connector.git && \
+    git clone --depth 1 -b 16.0 https://github.com/OCA/account-financial-tools.git && \
+    git clone --depth 1 -b 16.0 https://github.com/OCA/account-reconcile.git && \
+    git clone --depth 1 -b 16.0 https://github.com/OCA/account-financial-reporting.git && \
+    git clone --depth 1 -b 16.0 https://github.com/OCA/bank-statement-import.git && \
+    git clone --depth 1 -b 16.0 https://github.com/OCA/cooperative.git && \
+    git clone --depth 1 -b 16.0 https://github.com/OCA/mis-builder.git && \
+    git clone --depth 1 -b 16.0 https://github.com/OCA/community-data-ownership.git && \
+    for repo in /tmp/oca/*/; do \
+        for mod in "$repo"*/; do \
+            [ -f "$mod/__manifest__.py" ] && cp -r "$mod" /opt/odoo/oca-addons/; \
+        done; \
+    done && \
+    rm -rf /tmp/oca
 
-# Contract sub-modules (depend on base contract, install after)
-RUN pip3 install --no-cache-dir \
-    odoo-addon-contract-mandate==16.0.* \
-    odoo-addon-contract-variable-quantity==16.0.* \
-    || echo "Warning: Some contract sub-modules not available"
-
-# /mnt/extra-addons is declared as VOLUME in the base Odoo image,
-# so anything written there during build is lost at runtime.
-# We use /opt/odoo/custom-addons instead.
+# Coopdevs energy community modules
 RUN mkdir -p /opt/odoo/custom-addons && \
     git clone --depth 1 --branch 16.0 \
         https://git.coopdevs.org/coopdevs/comunitats-energetiques/odoo-ce.git \
@@ -60,20 +71,16 @@ RUN mkdir -p /opt/odoo/custom-addons && \
         basename="$(basename "$mod")" && \
         case "$basename" in energy_*|community_*) cp -r "$mod" /opt/odoo/custom-addons/ ;; esac; \
     done && \
-    ls /opt/odoo/custom-addons/ && \
     rm -rf /tmp/odoo-ce
 
 COPY addons/nekazari_connector /opt/odoo/custom-addons/nekazari_connector
 
-# Odoo configuration
 COPY odoo.conf /etc/odoo/odoo.conf
 
-# Custom entrypoint
 COPY entrypoint.sh /entrypoint-nkz.sh
 RUN chmod +x /entrypoint-nkz.sh
 
-# Permissions
-RUN chown -R odoo:odoo /opt/odoo/custom-addons \
+RUN chown -R odoo:odoo /opt/odoo/custom-addons /opt/odoo/oca-addons \
     && chown odoo:odoo /etc/odoo/odoo.conf
 
 USER odoo
