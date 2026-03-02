@@ -124,6 +124,7 @@ RUN mkdir -p /opt/odoo/custom-addons && \
 COPY patches/energy_communities_hooks.py /opt/odoo/custom-addons/energy_communities/hooks.py
 
 COPY addons/nekazari_connector /opt/odoo/custom-addons/nekazari_connector
+COPY addons/nekazari_web_theme /opt/odoo/custom-addons/nekazari_web_theme
 
 COPY odoo.conf /etc/odoo/odoo.conf
 

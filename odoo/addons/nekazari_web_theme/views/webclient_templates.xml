@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <!-- ═══ Browser tab title: "Odoo" → "Nekazari" ═══════════════════════ -->
+    <template id="nekazari_title" inherit_id="web.layout" name="Nekazari Title">
+        <xpath expr="//head/title" position="replace">
+            <title t-esc="title or 'Nekazari'"/>
+        </xpath>
+        <xpath expr="//head/link[@rel='shortcut icon']" position="replace">
+            <link type="image/svg+xml" rel="shortcut icon"
+                  href="/nekazari_web_theme/static/src/img/favicon.svg"/>
+        </xpath>
+    </template>
+
+    <!-- ═══ Login page: replace company logo with Nekazari logo ══════════ -->
+    <template id="nekazari_login_logo" inherit_id="web.login_layout" name="Nekazari Login Logo">
+        <!-- Replace the company logo image with the Nekazari SVG logo -->
+        <xpath expr="//img[contains(@t-attf-src, 'company_logo')]" position="replace">
+            <img src="/nekazari_web_theme/static/src/img/nekazari_logo.svg"
+                 alt="Nekazari" style="max-height:80px; max-width:100%; width:auto"/>
+        </xpath>
+        <!-- Replace "Powered by Odoo" footer with "Powered by Nekazari" -->
+        <xpath expr="//a[contains(@href, 'odoo.com')]" position="replace">
+            <a href="https://nekazari.robotika.cloud" target="_blank">
+                Powered by <span>Nekazari</span>
+            </a>
+        </xpath>
+    </template>
+
+</odoo>
