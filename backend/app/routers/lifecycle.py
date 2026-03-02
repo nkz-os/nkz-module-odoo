@@ -120,11 +120,14 @@ async def _handle_enable(event: LifecycleEvent) -> dict:
     try:
         odoo = OdooClient()
 
-        # Duplicate template
-        await odoo.duplicate_database(
-            source_db=settings.ODOO_TEMPLATE_DB,
-            target_db=db_name,
-        )
+        # Duplicate template (skip if DB already exists from a previous partial attempt)
+        if await odoo.database_exists(db_name):
+            logger.info(f"[lifecycle] DB {db_name} already exists — skipping clone")
+        else:
+            await odoo.duplicate_database(
+                source_db=settings.ODOO_TEMPLATE_DB,
+                target_db=db_name,
+            )
 
         # Energy modules are pre-installed in the template; install extras if needed
         energy_modules = [
