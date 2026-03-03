@@ -9,8 +9,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  # Usamos el nombre del repositorio para vincular la imagen automáticamente
-  IMAGE_NAME: ${{ github.repository }}-backend
+  IMAGE_NAME: ${{ github.repository }}
 
 jobs:
   build-and-push:
