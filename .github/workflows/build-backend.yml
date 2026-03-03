@@ -1,5 +1,5 @@
 name: Build and Push Odoo Backend
-
+# Trigger with correct permissions
 on:
   push:
     branches: [ main ]
