@@ -358,7 +358,8 @@ async def register_tenant_subscriptions(tenant_id: str):
                     "uri": webhook_url,
                     "accept": "application/json"
                 }
-            }
+            },
+            "@context": "https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context.jsonld"
         }
 
         async with httpx.AsyncClient() as client:
