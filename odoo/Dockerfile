@@ -125,6 +125,7 @@ COPY patches/energy_communities_hooks.py /opt/odoo/custom-addons/energy_communit
 
 COPY addons/nekazari_connector /opt/odoo/custom-addons/nekazari_connector
 COPY addons/nekazari_web_theme /opt/odoo/custom-addons/nekazari_web_theme
+COPY addons/auth_oauth_nekazari_fix /opt/odoo/custom-addons/auth_oauth_nekazari_fix
 
 COPY odoo.conf /etc/odoo/odoo.conf
 
