@@ -1,7 +1,17 @@
 # Copyright 2026 Robotika
 # License AGPL-3.0
 
+import logging
+
 from odoo import models
+from odoo.exceptions import AccessDenied, UserError
+
+_logger = logging.getLogger(__name__)
+
+try:
+    from odoo.addons.auth_signup.models.res_users import SignupError
+except ImportError:
+    SignupError = Exception
 
 
 class ResUsers(models.Model):
@@ -32,3 +42,25 @@ class ResUsers(models.Model):
                 "active": True,
             }
         return super()._generate_signup_values(provider, validation, params)
+
+    def constrains_user_login(self):
+        """Skip energy_communities vat/country write for OAuth users (no Spanish VAT)."""
+        for record in self:
+            if record.oauth_uid:
+                return  # OAuth users: skip partner vat/country_id write
+        return super().constrains_user_login()
+
+    def _auth_oauth_signin(self, provider, validation, params):
+        """Log real exception when OAuth signup fails for Nekazari."""
+        try:
+            return super()._auth_oauth_signin(provider, validation, params)
+        except (AccessDenied, SignupError, UserError) as e:
+            oauth_provider = self.env["auth.oauth.provider"].browse(provider)
+            if oauth_provider.name and "nekazari" in oauth_provider.name.lower():
+                _logger.exception(
+                    "[Nekazari OAuth] signup/signin failed: %s (provider=%s user_id=%s)",
+                    e,
+                    provider,
+                    validation.get("user_id"),
+                )
+            raise
