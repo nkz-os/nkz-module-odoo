@@ -4,7 +4,7 @@
 # 1. odoo-api-ingress: /api/odoo → FastAPI backend (on api.YOUR_DOMAIN)
 # 2. odoo-direct-ingress: odoo.YOUR_DOMAIN → Odoo 16 web UI
 #
-# Replace YOUR_DOMAIN at deploy time (e.g. robotika.cloud).
+# Replace YOUR_DOMAIN at deploy time (e.g. example.com).
 #
 # Author: Kate Benetis <kate@robotika.cloud>
 # Company: Robotika
