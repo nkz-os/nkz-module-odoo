@@ -13,6 +13,7 @@ export interface TenantOdooInfo {
   name: string;
   odooDatabase: string;
   odooUrl: string;
+  odooLoginUrl: string | null;  // Direct SSO login URL (skips Odoo login page)
   status: 'active' | 'provisioning' | 'error';
   lastSync: string | null;
   energyModulesEnabled: boolean;

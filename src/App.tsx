@@ -1,49 +1,40 @@
 /**
  * Nekazari Odoo ERP Module - Main Application
  *
- * This module provides multitenant Odoo ERP integration for Nekazari platform.
- * Each tenant gets their own isolated Odoo database (Multi-DB architecture).
- *
- * Features:
- * - Farm management (products, parcels, harvests)
- * - Energy community management (Som Comunitats modules)
- * - Solar installation tracking
- * - NGSI-LD entity synchronization
- * - N8N workflow integration
- * - Intelligence module predictions
+ * Native dashboard with SSO link to Odoo.
+ * No iframe — Odoo runs on its own subdomain with Keycloak SSO.
  *
  * @author Kate Benetis <kate@robotika.cloud>
  * @company Robotika
  * @license AGPL-3.0
  */
 
-import React, { useState, useCallback } from 'react';
-import { Building2, Sun, Leaf, RefreshCw, ExternalLink, Settings } from 'lucide-react';
+import React, { useState } from 'react';
+import {
+  Building2, Sun, Leaf, RefreshCw, ExternalLink,
+  Settings, Package, FileText, Zap, AlertCircle,
+  CheckCircle2, Clock
+} from 'lucide-react';
 import { OdooProvider, useOdoo } from './services/context';
 import './index.css';
 
-type TabType = 'dashboard' | 'sales' | 'inventory' | 'accounting';
+const StatCard: React.FC<{
+  icon: React.ReactNode;
+  label: string;
+  value: number | string;
+}> = ({ icon, label, value }) => (
+  <div className="odoo-stat-card">
+    <div className="odoo-stat-icon">{icon}</div>
+    <div className="odoo-stat-info">
+      <span className="odoo-stat-value">{value}</span>
+      <span className="odoo-stat-label">{label}</span>
+    </div>
+  </div>
+);
 
 const OdooContent: React.FC = () => {
-  const { tenantInfo, isLoading, error, refreshTenant, provisionOdoo } = useOdoo();
+  const { tenantInfo, isLoading, error, refreshTenant, provisionOdoo, stats, syncStatus, triggerSync } = useOdoo();
   const [isProvisioning, setIsProvisioning] = useState(false);
-  const [activeTab, setActiveTab] = useState<TabType>('dashboard');
-  const [iframeLoaded, setIframeLoaded] = useState(false);
-  const [iframeError, setIframeError] = useState(false);
-
-  const getOdooUrl = useCallback(() => {
-    if (!tenantInfo?.odooUrl) return '';
-
-    // Map tabs to Odoo menu paths
-    const paths: Record<TabType, string> = {
-      dashboard: '',
-      sales: '#menu_id=sale.sale_menu_root',
-      inventory: '#menu_id=stock.menu_stock_root',
-      accounting: '#menu_id=account.menu_finance'
-    };
-
-    return `${tenantInfo.odooUrl}${paths[activeTab]}`;
-  }, [tenantInfo, activeTab]);
 
   if (isLoading) {
     return (
@@ -57,6 +48,7 @@ const OdooContent: React.FC = () => {
   if (error) {
     return (
       <div className="odoo-error">
+        <AlertCircle size={48} style={{ marginBottom: '1rem', opacity: 0.6 }} />
         <h2>Connection Error</h2>
         <p>{error}</p>
         <button className="odoo-btn odoo-btn-primary" onClick={refreshTenant}>
@@ -82,10 +74,10 @@ const OdooContent: React.FC = () => {
         <h2>Odoo ERP Not Configured</h2>
         <p>Your organization does not have an Odoo instance yet.</p>
         <p style={{ fontSize: '0.9rem', opacity: 0.8, marginBottom: '1.5rem' }}>
-          Click below to provision your dedicated Odoo ERP with farm management, 
+          Click below to provision your dedicated Odoo ERP with farm management,
           energy community modules, and NGSI-LD synchronization.
         </p>
-        <button 
+        <button
           className="odoo-btn odoo-btn-primary"
           onClick={handleProvision}
           disabled={isProvisioning}
@@ -116,88 +108,121 @@ const OdooContent: React.FC = () => {
     );
   }
 
-  const handleIframeLoad = () => {
-    setIframeLoaded(true);
-    setIframeError(false);
-  };
-
-  const handleIframeError = () => {
-    setIframeError(true);
-    setIframeLoaded(true);
-  };
+  // Use SSO URL if available, fall back to regular Odoo URL
+  const odooLink = tenantInfo.odooLoginUrl || tenantInfo.odooUrl;
 
   return (
     <div className="odoo-content">
-      <nav className="odoo-nav">
-        <button
-          className={`odoo-nav-btn ${activeTab === 'dashboard' ? 'active' : ''}`}
-          onClick={() => { setActiveTab('dashboard'); setIframeLoaded(false); }}
-        >
-          <Building2 size={16} style={{ marginRight: '0.5rem' }} />
-          Dashboard
-        </button>
-        <button
-          className={`odoo-nav-btn ${activeTab === 'sales' ? 'active' : ''}`}
-          onClick={() => { setActiveTab('sales'); setIframeLoaded(false); }}
-        >
-          <Sun size={16} style={{ marginRight: '0.5rem' }} />
-          Sales
-        </button>
-        <button
-          className={`odoo-nav-btn ${activeTab === 'inventory' ? 'active' : ''}`}
-          onClick={() => { setActiveTab('inventory'); setIframeLoaded(false); }}
-        >
-          <Leaf size={16} style={{ marginRight: '0.5rem' }} />
-          Inventory
-        </button>
-        <button
-          className={`odoo-nav-btn ${activeTab === 'accounting' ? 'active' : ''}`}
-          onClick={() => { setActiveTab('accounting'); setIframeLoaded(false); }}
-        >
-          <Settings size={16} style={{ marginRight: '0.5rem' }} />
-          Accounting
-        </button>
-      </nav>
-
-      <div className="odoo-iframe-container">
-        {!iframeLoaded && !iframeError && (
-          <div className="odoo-loading">
-            <div className="odoo-spinner" />
-            <p>Loading Odoo...</p>
-          </div>
-        )}
-        {iframeError ? (
-          <div className="odoo-fallback">
-            <Building2 size={48} style={{ marginBottom: '1rem', opacity: 0.6 }} />
-            <p>Unable to load Odoo in embedded mode.</p>
-            <a 
-              href={tenantInfo.odooUrl} 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="odoo-btn odoo-btn-primary"
-            >
-              <ExternalLink size={16} style={{ marginRight: '0.5rem' }} />
-              Open Odoo in New Tab
-            </a>
-          </div>
-        ) : (
-          <iframe
-            className="odoo-iframe"
-            src={getOdooUrl()}
-            title="Odoo ERP"
-            onLoad={handleIframeLoad}
-            onError={handleIframeError}
-            style={{ display: iframeLoaded ? 'block' : 'none' }}
-            allow="fullscreen"
-          />
-        )}
+      {/* Stats */}
+      <div className="odoo-stats-grid">
+        <StatCard
+          icon={<Package size={20} />}
+          label="Products"
+          value={stats?.products ?? '—'}
+        />
+        <StatCard
+          icon={<Building2 size={20} />}
+          label="Assets"
+          value={stats?.assets ?? '—'}
+        />
+        <StatCard
+          icon={<FileText size={20} />}
+          label="Invoices"
+          value={stats?.invoices ?? '—'}
+        />
+        <StatCard
+          icon={<Zap size={20} />}
+          label="Energy Installations"
+          value={stats?.energyInstallations ?? '—'}
+        />
       </div>
+
+      {/* Sync Status */}
+      <div className="odoo-sync-panel">
+        <div className="odoo-sync-status">
+          {syncStatus === 'synced' ? (
+            <CheckCircle2 size={16} style={{ color: '#22c55e' }} />
+          ) : syncStatus === 'syncing' ? (
+            <RefreshCw size={16} className="animate-spin" style={{ color: '#3b82f6' }} />
+          ) : (
+            <Clock size={16} style={{ color: '#f59e0b' }} />
+          )}
+          <span>
+            {syncStatus === 'synced' ? 'Synced with Nekazari' :
+             syncStatus === 'syncing' ? 'Syncing...' :
+             'Sync needed'}
+          </span>
+          {stats?.pendingSync ? (
+            <span className="odoo-pending-badge">{stats.pendingSync} pending</span>
+          ) : null}
+        </div>
+        <button
+          className="odoo-btn odoo-btn-secondary"
+          onClick={triggerSync}
+          disabled={syncStatus === 'syncing'}
+        >
+          <RefreshCw size={14} />
+          Sync Now
+        </button>
+      </div>
+
+      {/* Open Odoo */}
+      <div className="odoo-actions">
+        <a
+          href={odooLink}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="odoo-btn odoo-btn-primary odoo-btn-large"
+        >
+          <ExternalLink size={18} style={{ marginRight: '0.5rem' }} />
+          Open Odoo ERP
+        </a>
+
+        {/* Quick links to specific Odoo sections */}
+        <div className="odoo-quick-links">
+          <a
+            href={`${tenantInfo.odooUrl}#menu_id=sale.sale_menu_root`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="odoo-quick-link"
+          >
+            <Sun size={14} />
+            Sales
+          </a>
+          <a
+            href={`${tenantInfo.odooUrl}#menu_id=stock.menu_stock_root`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="odoo-quick-link"
+          >
+            <Leaf size={14} />
+            Inventory
+          </a>
+          <a
+            href={`${tenantInfo.odooUrl}#menu_id=account.menu_finance`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="odoo-quick-link"
+          >
+            <FileText size={14} />
+            Accounting
+          </a>
+        </div>
+      </div>
+
+      {/* Module info */}
+      {tenantInfo.energyModulesEnabled && (
+        <div className="odoo-info-panel">
+          <Zap size={14} style={{ color: '#f59e0b' }} />
+          <span>Energy community modules enabled</span>
+        </div>
+      )}
     </div>
   );
 };
 
 const OdooHeader: React.FC = () => {
-  const { tenantInfo, syncStatus, triggerSync } = useOdoo();
+  const { tenantInfo } = useOdoo();
 
   return (
     <header className="odoo-header">
@@ -211,42 +236,6 @@ const OdooHeader: React.FC = () => {
             </span>
           )}
         </div>
-      </div>
-
-      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-        <div className="odoo-status">
-          <span
-            className={`odoo-status-dot ${
-              syncStatus === 'syncing' ? 'syncing' :
-              syncStatus === 'synced' ? 'connected' : 'disconnected'
-            }`}
-          />
-          <span style={{ fontSize: '0.875rem' }}>
-            {syncStatus === 'syncing' ? 'Syncing...' :
-             syncStatus === 'synced' ? 'Synced' : 'Sync needed'}
-          </span>
-        </div>
-
-        <button
-          className="odoo-nav-btn"
-          onClick={triggerSync}
-          disabled={syncStatus === 'syncing'}
-          title="Sync with Nekazari"
-        >
-          <RefreshCw size={16} className={syncStatus === 'syncing' ? 'animate-spin' : ''} />
-        </button>
-
-        {tenantInfo?.odooUrl && (
-          <a
-            href={tenantInfo.odooUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="odoo-nav-btn"
-            title="Open in new tab"
-          >
-            <ExternalLink size={16} />
-          </a>
-        )}
       </div>
     </header>
   );

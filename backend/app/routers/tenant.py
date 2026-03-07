@@ -30,6 +30,7 @@ class TenantOdooInfo(BaseModel):
     name: str
     odooDatabase: str
     odooUrl: str
+    odooLoginUrl: Optional[str] = None  # Direct SSO login URL (skips Odoo login page)
     status: str  # active, provisioning, error
     lastSync: Optional[str] = None
     energyModulesEnabled: bool = False
@@ -63,11 +64,15 @@ async def get_tenant_info(
         if not info:
             raise HTTPException(status_code=404, detail="Odoo not provisioned for this tenant")
 
+        # Build direct SSO login URL if OAuth is configured
+        login_url = await _build_sso_login_url(tenant_id, info)
+
         return TenantOdooInfo(
             id=tenant_id,
             name=info.get("name") or tenant_id,
             odooDatabase=info.get("database") or f"nkz_odoo_{tenant_id}",
             odooUrl=_build_tenant_odoo_url(tenant_id),
+            odooLoginUrl=login_url,
             status=info.get("status") or "unknown",
             lastSync=info.get("last_sync"),
             energyModulesEnabled=info.get("energy_modules_enabled") or False,
@@ -140,16 +145,18 @@ async def provision_tenant(
             is_admin=True
         )
 
-        # Save tenant info
-        await save_tenant_odoo_info(tenant_id, {
-            "name": tenant_id,
-            "database": db_name,
-            "status": "active",
-            "energy_modules_enabled": request.enableEnergyModules,
-            "installed_modules": modules_to_install,
-            "created_at": datetime.utcnow().isoformat(),
-            "admin_email": admin_email
-        })
+        # Configure Keycloak OAuth SSO provider
+        oauth_provider_id = None
+        if settings.KEYCLOAK_PUBLIC_URL and settings.ODOO_OAUTH_CLIENT_ID:
+            try:
+                oauth_provider_id = await odoo_client.configure_oauth_provider(
+                    db_name=db_name,
+                    keycloak_public_url=settings.KEYCLOAK_PUBLIC_URL,
+                    realm=settings.KEYCLOAK_REALM,
+                    client_id=settings.ODOO_OAUTH_CLIENT_ID,
+                )
+            except Exception as oauth_err:
+                logger.warning(f"OAuth provider setup failed (non-fatal): {oauth_err}")
 
         # Register NGSI-LD subscriptions for this tenant
         from app.services.ngsi_sync import register_tenant_subscriptions
@@ -157,11 +164,26 @@ async def provision_tenant(
 
         logger.info(f"Successfully provisioned Odoo for tenant: {tenant_id}")
 
+        # Save tenant info including OAuth provider ID
+        await save_tenant_odoo_info(tenant_id, {
+            "name": tenant_id,
+            "database": db_name,
+            "status": "active",
+            "energy_modules_enabled": request.enableEnergyModules,
+            "installed_modules": modules_to_install,
+            "created_at": datetime.utcnow().isoformat(),
+            "admin_email": admin_email,
+            "oauth_provider_id": oauth_provider_id,
+        })
+
+        login_url = _build_sso_login_url_sync(tenant_id, oauth_provider_id)
+
         return TenantOdooInfo(
             id=tenant_id,
             name=tenant_id,
             odooDatabase=db_name,
             odooUrl=_build_tenant_odoo_url(tenant_id),
+            odooLoginUrl=login_url,
             status="active",
             lastSync=None,
             energyModulesEnabled=request.enableEnergyModules,
@@ -223,14 +245,50 @@ async def delete_tenant_odoo(
 
 
 def _build_tenant_odoo_url(tenant_id: str) -> str:
-    """Build the Odoo URL for a tenant (relative or absolute from ODOO_URL).
-    
-    When ODOO_URL is empty, returns a relative path so the frontend uses
-    the same origin (e.g. /odoo/web?db=...). When set, returns full URL for
-    a separate Odoo subdomain (e.g. https://odoo.YOUR_DOMAIN/web?db=...).
-    """
+    """Build the Odoo web URL for a tenant."""
     db_name = f"nkz_odoo_{tenant_id}"
     base = (settings.ODOO_URL or "").strip().rstrip("/")
     if not base:
-        return f"/odoo/web?db={db_name}"
+        return f"/web?db={db_name}"
     return f"{base}/web?db={db_name}"
+
+
+def _build_sso_login_url_sync(
+    tenant_id: str,
+    oauth_provider_id: Optional[int],
+) -> Optional[str]:
+    """Build the direct SSO login URL (skips Odoo login page)."""
+    if not oauth_provider_id:
+        return None
+    db_name = f"nkz_odoo_{tenant_id}"
+    base = (settings.ODOO_URL or "").strip().rstrip("/")
+    if not base:
+        return None
+    return f"{base}/auth_oauth/signin?p={oauth_provider_id}&d={db_name}&redirect=%2Fweb"
+
+
+async def _build_sso_login_url(
+    tenant_id: str,
+    info: dict,
+) -> Optional[str]:
+    """Build SSO login URL from stored tenant info, fetching provider ID if needed."""
+    provider_id = info.get("oauth_provider_id")
+
+    # If not stored, try to look it up from Odoo
+    if not provider_id and settings.KEYCLOAK_PUBLIC_URL:
+        try:
+            db_name = info.get("database") or f"nkz_odoo_{tenant_id}"
+            odoo_client = OdooClient()
+            provider_id = await odoo_client.get_oauth_provider_id(
+                db_name, settings.ODOO_OAUTH_CLIENT_ID
+            )
+            if provider_id:
+                # Cache it for next time
+                await save_tenant_odoo_info(tenant_id, {
+                    **info,
+                    "oauth_provider_id": provider_id,
+                })
+        except Exception as e:
+            logger.warning(f"Could not fetch OAuth provider ID: {e}")
+
+    return _build_sso_login_url_sync(tenant_id, provider_id)

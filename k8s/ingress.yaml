@@ -1,9 +1,10 @@
 # Nekazari Odoo ERP Module - Ingress
 #
-# Module frontend: served from MinIO; host loads /modules/odoo-erp/nkz-module.js.
+# Two ingresses:
+# 1. odoo-api-ingress: /api/odoo → FastAPI backend (on api.YOUR_DOMAIN)
+# 2. odoo-direct-ingress: odoo.YOUR_DOMAIN → Odoo 16 web UI
 #
-# Replace YOUR_DOMAIN with your deployment domain. Use the same API host as your
-# main platform if combined (e.g. nkz.YOUR_DOMAIN); otherwise api.YOUR_DOMAIN.
+# Replace YOUR_DOMAIN at deploy time (e.g. robotika.cloud).
 #
 # Author: Kate Benetis <kate@robotika.cloud>
 # Company: Robotika
@@ -41,7 +42,7 @@ spec:
       secretName: nkz-tls
 
 ---
-# Middleware: set X-Forwarded-Host so Odoo builds correct URLs (replace YOUR_DOMAIN).
+# Middleware: set X-Forwarded-Host so Odoo builds correct URLs
 apiVersion: traefik.io/v1alpha1
 kind: Middleware
 metadata:
@@ -73,20 +74,22 @@ spec:
     - host: odoo.YOUR_DOMAIN
       http:
         paths:
+          # Block database management UI (security)
           - path: /web/database/manager
             pathType: Prefix
             backend:
               service:
-                name: odoo-forbidden-service
+                name: odoo-backend-service
                 port:
                   number: 80
           - path: /web/database/selector
             pathType: Prefix
             backend:
               service:
-                name: odoo-forbidden-service
+                name: odoo-backend-service
                 port:
                   number: 80
+          # All other traffic → Odoo
           - path: /
             pathType: Prefix
             backend:

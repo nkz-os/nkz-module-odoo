@@ -27,7 +27,7 @@ run_on_server() {
     sudo kubectl port-forward -n nekazari svc/minio-service 9000:9000 &
     PF_PID=\$!
     sleep 3
-    mc alias set minio http://localhost:9000 minioadmin minioadmin
+    mc alias set minio "$MINIO_URL" "$MINIO_ACCESS_KEY" "$MINIO_SECRET_KEY"
     mc cp "/tmp/${BUNDLE}" "minio/${BUCKET_PATH}"
     kill \$PF_PID 2>/dev/null || true
     echo "Done: minio/${BUCKET_PATH}"
@@ -43,7 +43,7 @@ run_local() {
   sudo kubectl port-forward -n nekazari svc/minio-service 9000:9000 &
   PF_PID=$!
   sleep 3
-  mc alias set minio http://localhost:9000 minioadmin minioadmin
+  mc alias set minio "$MINIO_URL" "$MINIO_ACCESS_KEY" "$MINIO_SECRET_KEY"
   mc cp "dist/${BUNDLE}" "minio/${BUCKET_PATH}"
   kill $PF_PID 2>/dev/null || true
   echo "Done: minio/${BUCKET_PATH}"

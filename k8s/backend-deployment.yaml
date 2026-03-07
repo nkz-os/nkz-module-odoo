@@ -97,6 +97,16 @@ spec:
                 configMapKeyRef:
                   name: odoo-config
                   key: KEYCLOAK_CLIENT_ID
+            - name: KEYCLOAK_PUBLIC_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: odoo-config
+                  key: KEYCLOAK_PUBLIC_URL
+            - name: ODOO_OAUTH_CLIENT_ID
+              valueFrom:
+                configMapKeyRef:
+                  name: odoo-config
+                  key: ODOO_OAUTH_CLIENT_ID
             - name: ORION_URL
               valueFrom:
                 configMapKeyRef:

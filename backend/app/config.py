@@ -53,6 +53,10 @@ class Settings(BaseSettings):
     KEYCLOAK_CLIENT_ID: str = "nekazari-api"
     JWKS_URL: str = ""
 
+    # Keycloak OAuth for Odoo SSO
+    KEYCLOAK_PUBLIC_URL: str = ""  # Public URL (https://auth.robotika.cloud/auth)
+    ODOO_OAUTH_CLIENT_ID: str = "nekazari-odoo"
+
     # NGSI-LD Context Broker
     ORION_URL: str = "http://orion-ld-service:1026"
 
