@@ -26,8 +26,6 @@ spec:
         app: odoo
         module: odoo-erp
     spec:
-      imagePullSecrets:
-        - name: ghcr-secret
       containers:
         - name: odoo
           image: ghcr.io/k8-benetis/nkz-module-odoo/odoo:latest
