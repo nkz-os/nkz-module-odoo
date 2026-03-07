@@ -29,7 +29,7 @@ data:
   KEYCLOAK_CLIENT_ID: "nekazari-api"
 
   # Public Keycloak URL (as seen by browsers, for OAuth redirects)
-  # Replace YOUR_DOMAIN (e.g. https://auth.robotika.cloud/auth)
+  # Replace YOUR_DOMAIN (e.g. https://auth.example.com/auth)
   KEYCLOAK_PUBLIC_URL: "https://auth.YOUR_DOMAIN/auth"
 
   # Keycloak client ID for Odoo OAuth SSO

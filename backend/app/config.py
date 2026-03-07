@@ -54,7 +54,7 @@ class Settings(BaseSettings):
     JWKS_URL: str = ""
 
     # Keycloak OAuth for Odoo SSO
-    KEYCLOAK_PUBLIC_URL: str = ""  # Public URL (https://auth.robotika.cloud/auth)
+    KEYCLOAK_PUBLIC_URL: str = ""  # Public URL (e.g. https://auth.YOUR_DOMAIN/auth)
     ODOO_OAUTH_CLIENT_ID: str = "nekazari-odoo"
 
     # NGSI-LD Context Broker
