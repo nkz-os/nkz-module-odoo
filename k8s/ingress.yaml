@@ -26,7 +26,7 @@ metadata:
 spec:
   ingressClassName: traefik
   rules:
-    - host: api.YOUR_DOMAIN
+    - host: nkz.robotika.cloud
       http:
         paths:
           - path: /api/odoo
@@ -38,7 +38,7 @@ spec:
                   number: 80
   tls:
     - hosts:
-        - api.YOUR_DOMAIN
+        - nkz.robotika.cloud
       secretName: nkz-tls
 
 ---
@@ -52,7 +52,7 @@ spec:
   headers:
     customRequestHeaders:
       X-Forwarded-Proto: "https"
-      X-Forwarded-Host: "odoo.YOUR_DOMAIN"
+      X-Forwarded-Host: "odoo.robotika.cloud"
 
 ---
 apiVersion: networking.k8s.io/v1
@@ -71,7 +71,7 @@ metadata:
 spec:
   ingressClassName: traefik
   rules:
-    - host: odoo.YOUR_DOMAIN
+    - host: odoo.robotika.cloud
       http:
         paths:
           # Block database management UI (security)
@@ -99,5 +99,5 @@ spec:
                   number: 8069
   tls:
     - hosts:
-        - odoo.YOUR_DOMAIN
+        - odoo.robotika.cloud
       secretName: odoo-tls

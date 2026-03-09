@@ -10,7 +10,6 @@
 
 import { ModuleViewerSlots } from './types';
 import OdooEntityLink from '../components/slots/OdooEntityLink';
-import OdooQuickActions from '../components/slots/OdooQuickActions';
 import OdooStatusWidget from '../components/slots/OdooStatusWidget';
 import { OdooProvider } from '../services/context';
 
@@ -44,15 +43,10 @@ export const viewerSlots: ModuleViewerSlots = {
 
   'bottom-panel': [],
 
-  'entity-tree': [
-    {
-      id: 'odoo-quick-actions',
-      moduleId: MODULE_ID,
-      component: 'OdooQuickActions',
-      priority: 50,
-      localComponent: OdooQuickActions
-    }
-  ],
+  // entity-tree is intentionally empty: OdooQuickActions belongs on the /odoo
+  // module page, not in the viewer sidebar. The viewer sidebar is reserved for
+  // the core entity tree (CoreEntityTree, priority 0).
+  'entity-tree': [],
 
   'map-layer': [],
 

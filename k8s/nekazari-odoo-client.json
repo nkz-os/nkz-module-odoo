@@ -9,17 +9,17 @@
   "implicitFlowEnabled": true,
   "directAccessGrantsEnabled": false,
   "serviceAccountsEnabled": false,
-  "rootUrl": "https://odoo.YOUR_DOMAIN",
+  "rootUrl": "https://odoo.robotika.cloud",
   "baseUrl": "/web",
   "redirectUris": [
-    "https://odoo.YOUR_DOMAIN/*"
+    "https://odoo.robotika.cloud/*"
   ],
   "webOrigins": [
-    "https://odoo.YOUR_DOMAIN",
-    "https://YOUR_FRONTEND_DOMAIN"
+    "https://odoo.robotika.cloud",
+    "https://nekazari.robotika.cloud"
   ],
   "attributes": {
-    "post.logout.redirect.uris": "https://odoo.YOUR_DOMAIN/*",
+    "post.logout.redirect.uris": "https://odoo.robotika.cloud/*",
     "pkce.code.challenge.method": ""
   },
   "protocolMappers": [
