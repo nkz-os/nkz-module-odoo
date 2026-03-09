@@ -29,14 +29,13 @@ data:
   KEYCLOAK_CLIENT_ID: "nekazari-api"
 
   # Public Keycloak URL (as seen by browsers, for OAuth redirects)
-  # Replace YOUR_DOMAIN (e.g. https://auth.example.com/auth)
-  KEYCLOAK_PUBLIC_URL: "https://auth.YOUR_DOMAIN/auth"
+  KEYCLOAK_PUBLIC_URL: "https://auth.robotika.cloud/auth"
 
   # Keycloak client ID for Odoo OAuth SSO
   ODOO_OAUTH_CLIENT_ID: "nekazari-odoo"
 
-  # Comma-separated origins for CORS. Replace YOUR_DOMAIN with frontend and Odoo hosts.
-  ALLOWED_ORIGINS_STR: "https://frontend.YOUR_DOMAIN,https://odoo.YOUR_DOMAIN"
+  # Comma-separated origins for CORS
+  ALLOWED_ORIGINS_STR: "https://nekazari.robotika.cloud,https://odoo.robotika.cloud"
 
   # Public URL for Odoo web UI (subdomain)
-  ODOO_URL: "https://odoo.YOUR_DOMAIN"
+  ODOO_URL: "https://odoo.robotika.cloud"

@@ -76,10 +76,14 @@ function OdooModulePageContent() {
     }
   };
 
+  // Prefer SSO login URL (auto-login via Keycloak) over plain Odoo URL
   const odooUrl =
     tenantInfo?.odooUrl ||
     (typeof window !== 'undefined' && (window as any).__ENV__?.ODOO_PUBLIC_URL) ||
     '';
+
+  const loginUrl = tenantInfo?.odooLoginUrl || odooUrl;
+  const hasSso = Boolean(tenantInfo?.odooLoginUrl);
 
   return (
     <div className="odoo-module-page">
@@ -134,22 +138,26 @@ function OdooModulePageContent() {
             <p>Su instancia de Odoo se está creando...</p>
             <p className="odoo-module-page__hint">Puede tardar unos minutos.</p>
           </div>
-        ) : odooUrl ? (
+        ) : loginUrl ? (
           <>
             <p className="odoo-module-page__card-text">
-              Su instancia está lista. Ábrala en una nueva pestaña para trabajar con el ERP.
+              Su instancia está lista.{' '}
+              {hasSso
+                ? 'Acceda directamente con su cuenta de la plataforma.'
+                : 'Ábrala en una nueva pestaña para trabajar con el ERP.'}
             </p>
             <a
-              href={odooUrl}
+              href={loginUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="odoo-btn odoo-btn-primary odoo-module-page__btn"
             >
               <ExternalLink size={20} />
-              Abrir Odoo ERP
+              {hasSso ? 'Entrar en Odoo ERP' : 'Abrir Odoo ERP'}
             </a>
             <p className="odoo-module-page__hint">
               Base de datos: {tenantInfo.odooDatabase || 'su base de datos'}
+              {hasSso && <span className="odoo-module-page__sso-badge"> · SSO activo</span>}
             </p>
           </>
         ) : (
