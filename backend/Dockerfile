@@ -5,6 +5,7 @@
 # License: AGPL-3.0
 
 FROM python:3.11-slim
+LABEL org.opencontainers.image.source=https://github.com/nkz-os/nkz-module-odoo
 
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1
