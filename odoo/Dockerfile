@@ -9,6 +9,7 @@
 # License: AGPL-3.0
 
 FROM odoo:16.0
+LABEL org.opencontainers.image.source=https://github.com/nkz-os/nkz-module-odoo
 
 USER root
 
