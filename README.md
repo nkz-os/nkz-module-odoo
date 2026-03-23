@@ -104,10 +104,10 @@ Ensure the platform DB has `remote_entry_url = '/modules/odoo-erp/nkz-module.js'
 
 ```bash
 # Build and push images (no frontend image)
-docker build -f backend/Dockerfile -t ghcr.io/k8-benetis/nkz-module-odoo/odoo-backend:latest ./backend
-docker build -f odoo/Dockerfile -t ghcr.io/k8-benetis/nkz-module-odoo/odoo:latest ./odoo
-docker push ghcr.io/k8-benetis/nkz-module-odoo/odoo-backend:latest
-docker push ghcr.io/k8-benetis/nkz-module-odoo/odoo:latest
+docker build -f backend/Dockerfile -t ghcr.io/nkz-os/nkz-module-odoo/odoo-backend:latest ./backend
+docker build -f odoo/Dockerfile -t ghcr.io/nkz-os/nkz-module-odoo/odoo:latest ./odoo
+docker push ghcr.io/nkz-os/nkz-module-odoo/odoo-backend:latest
+docker push ghcr.io/nkz-os/nkz-module-odoo/odoo:latest
 
 # Create secrets if not already present (CHANGE PASSWORDS!)
 kubectl create secret generic odoo-secret -n nekazari --from-literal=master-password='YOUR_SECURE_PASSWORD' --dry-run=client -o yaml | kubectl apply -f -
@@ -190,4 +190,4 @@ AGPL-3.0 - See [LICENSE](./LICENSE)
 ## Support
 
 For issues and feature requests, please use the GitHub issue tracker:
-https://github.com/k8-benetis/nkz-module-odoo/issues
+https://github.com/nkz-os/nkz-module-odoo/issues
