@@ -46,12 +46,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/k8-benetis/nkz-module-odoo.git"
+    "url": "https://github.com/nkz-os/nkz-module-odoo.git"
   },
   "bugs": {
-    "url": "https://github.com/k8-benetis/nkz-module-odoo/issues"
+    "url": "https://github.com/nkz-os/nkz-module-odoo/issues"
   },
-  "homepage": "https://github.com/k8-benetis/nkz-module-odoo#readme",
+  "homepage": "https://github.com/nkz-os/nkz-module-odoo#readme",
   "keywords": [
     "nekazari",
     "odoo",
