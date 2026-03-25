@@ -8,7 +8,7 @@
  * @license AGPL-3.0
  */
 
-import React, { useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
   Building2,
   ExternalLink,
@@ -21,33 +21,33 @@ import {
   Database,
   Shield,
 } from 'lucide-react';
+import { useTranslation } from '@nekazari/sdk';
 import { OdooProvider, useOdoo } from './services/context';
 import './index.css';
 
-const MODULE_DESCRIPTION =
-  'Integración multitenant de Odoo ERP con Nekazari: gestión de explotación, ' +
-  'comunidades energéticas (Som Comunitats), inventario, ventas y contabilidad. ' +
-  'Cada organización dispone de su propia base de datos Odoo aislada.';
-
-const FEATURES = [
-  { icon: Database, label: 'Una base de datos por organización (multi-tenant)' },
-  { icon: Package, label: 'Inventario, ventas y contabilidad' },
-  { icon: Zap, label: 'Comunidades energéticas y autoconsumo (Som Comunitats)' },
-  { icon: BarChart3, label: 'Sincronización con NGSI-LD y datos de la plataforma' },
-  { icon: FileText, label: 'Facturación e informes integrados' },
-  { icon: Shield, label: 'Acceso seguro con Keycloak (SSO)' },
-];
-
 function OdooModulePageContent() {
+  const { t } = useTranslation('odoo');
   const { tenantInfo, isLoading, error, refreshTenant, provisionOdoo } = useOdoo();
   const [isProvisioning, setIsProvisioning] = useState(false);
+
+  const features = useMemo(
+    () => [
+      { icon: Database, label: t('main.featureDb') },
+      { icon: Package, label: t('main.featureInvoicing') },
+      { icon: Zap, label: t('main.featureEnergy') },
+      { icon: BarChart3, label: t('main.featureNgsi') },
+      { icon: FileText, label: t('main.featureReports') },
+      { icon: Shield, label: t('main.featureSso') },
+    ],
+    [t]
+  );
 
   if (isLoading) {
     return (
       <div className="odoo-module-page">
         <div className="odoo-module-page__loading">
           <div className="odoo-spinner" />
-          <p>Comprobando configuración de Odoo...</p>
+          <p>{t('main.loading')}</p>
         </div>
       </div>
     );
@@ -57,10 +57,10 @@ function OdooModulePageContent() {
     return (
       <div className="odoo-module-page">
         <div className="odoo-module-page__card odoo-module-page__card--error">
-          <h2>Error de conexión</h2>
+          <h2>{t('main.errorTitle')}</h2>
           <p>{error}</p>
           <button className="odoo-btn odoo-btn-primary" onClick={refreshTenant}>
-            Reintentar
+            {t('main.retry')}
           </button>
         </div>
       </div>
@@ -91,14 +91,14 @@ function OdooModulePageContent() {
         <div className="odoo-module-page__hero-icon">
           <Building2 size={56} />
         </div>
-        <h1 className="odoo-module-page__title">Odoo ERP</h1>
-        <p className="odoo-module-page__lead">{MODULE_DESCRIPTION}</p>
+        <h1 className="odoo-module-page__title">{t('main.heroTitle')}</h1>
+        <p className="odoo-module-page__lead">{t('main.lead')}</p>
       </div>
 
       <div className="odoo-module-page__features">
-        <h2 className="odoo-module-page__features-title">Qué incluye</h2>
+        <h2 className="odoo-module-page__features-title">{t('main.featuresTitle')}</h2>
         <ul className="odoo-module-page__features-list">
-          {FEATURES.map(({ icon: Icon, label }) => (
+          {features.map(({ icon: Icon, label }) => (
             <li key={label} className="odoo-module-page__feature">
               <Icon size={20} className="odoo-module-page__feature-icon" />
               <span>{label}</span>
@@ -110,10 +110,7 @@ function OdooModulePageContent() {
       <div className="odoo-module-page__card odoo-module-page__card--cta">
         {!tenantInfo ? (
           <>
-            <p className="odoo-module-page__card-text">
-              Su organización aún no tiene una instancia de Odoo. Provisiónela para acceder al ERP
-              con su propia base de datos aislada.
-            </p>
+            <p className="odoo-module-page__card-text">{t('main.notProvisioned')}</p>
             <button
               className="odoo-btn odoo-btn-primary odoo-module-page__btn"
               onClick={handleProvision}
@@ -122,12 +119,12 @@ function OdooModulePageContent() {
               {isProvisioning ? (
                 <>
                   <RefreshCw size={20} className="animate-spin" />
-                  Provisionando...
+                  {t('main.provisioningBtn')}
                 </>
               ) : (
                 <>
                   <Settings size={20} />
-                  Configurar Odoo ERP
+                  {t('main.provisionCta')}
                 </>
               )}
             </button>
@@ -135,16 +132,13 @@ function OdooModulePageContent() {
         ) : tenantInfo.status === 'provisioning' ? (
           <div className="odoo-module-page__loading">
             <div className="odoo-spinner" />
-            <p>Su instancia de Odoo se está creando...</p>
-            <p className="odoo-module-page__hint">Puede tardar unos minutos.</p>
+            <p>{t('main.provisioningTitle')}</p>
+            <p className="odoo-module-page__hint">{t('main.provisioningHint')}</p>
           </div>
         ) : loginUrl ? (
           <>
             <p className="odoo-module-page__card-text">
-              Su instancia está lista.{' '}
-              {hasSso
-                ? 'Acceda directamente con su cuenta de la plataforma.'
-                : 'Ábrala en una nueva pestaña para trabajar con el ERP.'}
+              {hasSso ? t('main.readySso') : t('main.readyPlain')}
             </p>
             <a
               href={loginUrl}
@@ -153,18 +147,17 @@ function OdooModulePageContent() {
               className="odoo-btn odoo-btn-primary odoo-module-page__btn"
             >
               <ExternalLink size={20} />
-              {hasSso ? 'Entrar en Odoo ERP' : 'Abrir Odoo ERP'}
+              {hasSso ? t('main.enterOdoo') : t('main.openOdoo')}
             </a>
             <p className="odoo-module-page__hint">
-              Base de datos: {tenantInfo.odooDatabase || 'su base de datos'}
-              {hasSso && <span className="odoo-module-page__sso-badge"> · SSO activo</span>}
+              {t('main.database', {
+                name: tenantInfo.odooDatabase || t('main.defaultDatabaseName'),
+              })}
+              {hasSso && <span className="odoo-module-page__sso-badge">{t('main.ssoBadge')}</span>}
             </p>
           </>
         ) : (
-          <p className="odoo-module-page__card-text">
-            URL de Odoo no configurada. Configure ODOO_URL en el backend o ODOO_PUBLIC_URL en el
-            host.
-          </p>
+          <p className="odoo-module-page__card-text">{t('main.urlMissing')}</p>
         )}
       </div>
     </div>

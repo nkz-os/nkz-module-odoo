@@ -10,6 +10,7 @@
  */
 
 import React, { useState } from 'react';
+import { useTranslation } from '@nekazari/sdk';
 import {
   Building2, Sun, Leaf, RefreshCw, ExternalLink,
   Settings, Package, FileText, Zap, AlertCircle,
@@ -33,6 +34,7 @@ const StatCard: React.FC<{
 );
 
 const OdooContent: React.FC = () => {
+  const { t } = useTranslation('odoo');
   const { tenantInfo, isLoading, error, refreshTenant, provisionOdoo, stats, syncStatus, triggerSync } = useOdoo();
   const [isProvisioning, setIsProvisioning] = useState(false);
 
@@ -40,7 +42,7 @@ const OdooContent: React.FC = () => {
     return (
       <div className="odoo-loading">
         <div className="odoo-spinner" />
-        <p>Connecting to your Odoo instance...</p>
+        <p>{t('dashboard.loading')}</p>
       </div>
     );
   }
@@ -49,10 +51,10 @@ const OdooContent: React.FC = () => {
     return (
       <div className="odoo-error">
         <AlertCircle size={48} style={{ marginBottom: '1rem', opacity: 0.6 }} />
-        <h2>Connection Error</h2>
+        <h2>{t('dashboard.errorTitle')}</h2>
         <p>{error}</p>
         <button className="odoo-btn odoo-btn-primary" onClick={refreshTenant}>
-          Retry Connection
+          {t('dashboard.retry')}
         </button>
       </div>
     );
@@ -71,11 +73,10 @@ const OdooContent: React.FC = () => {
     return (
       <div className="odoo-provision">
         <Building2 size={64} style={{ marginBottom: '1.5rem', opacity: 0.6 }} />
-        <h2>Odoo ERP Not Configured</h2>
-        <p>Your organization does not have an Odoo instance yet.</p>
+        <h2>{t('dashboard.notConfiguredTitle')}</h2>
+        <p>{t('dashboard.notConfiguredLead')}</p>
         <p style={{ fontSize: '0.9rem', opacity: 0.8, marginBottom: '1.5rem' }}>
-          Click below to provision your dedicated Odoo ERP with farm management,
-          energy community modules, and NGSI-LD synchronization.
+          {t('dashboard.notConfiguredHint')}
         </p>
         <button
           className="odoo-btn odoo-btn-primary"
@@ -85,12 +86,12 @@ const OdooContent: React.FC = () => {
           {isProvisioning ? (
             <>
               <RefreshCw size={16} className="animate-spin" style={{ marginRight: '0.5rem' }} />
-              Provisioning...
+              {t('dashboard.provisioningBtn')}
             </>
           ) : (
             <>
               <Settings size={16} style={{ marginRight: '0.5rem' }} />
-              Provision Odoo ERP
+              {t('dashboard.provisionCta')}
             </>
           )}
         </button>
@@ -102,8 +103,8 @@ const OdooContent: React.FC = () => {
     return (
       <div className="odoo-loading">
         <div className="odoo-spinner" />
-        <p>Your Odoo instance is being provisioned...</p>
-        <p>This may take a few minutes.</p>
+        <p>{t('dashboard.provisioningTitle')}</p>
+        <p>{t('dashboard.provisioningHint')}</p>
       </div>
     );
   }
@@ -117,22 +118,22 @@ const OdooContent: React.FC = () => {
       <div className="odoo-stats-grid">
         <StatCard
           icon={<Package size={20} />}
-          label="Products"
+          label={t('dashboard.statProducts')}
           value={stats?.products ?? '—'}
         />
         <StatCard
           icon={<Building2 size={20} />}
-          label="Assets"
+          label={t('dashboard.statAssets')}
           value={stats?.assets ?? '—'}
         />
         <StatCard
           icon={<FileText size={20} />}
-          label="Invoices"
+          label={t('dashboard.statInvoices')}
           value={stats?.invoices ?? '—'}
         />
         <StatCard
           icon={<Zap size={20} />}
-          label="Energy Installations"
+          label={t('dashboard.statEnergy')}
           value={stats?.energyInstallations ?? '—'}
         />
       </div>
@@ -148,12 +149,16 @@ const OdooContent: React.FC = () => {
             <Clock size={16} style={{ color: '#f59e0b' }} />
           )}
           <span>
-            {syncStatus === 'synced' ? 'Synced with Nekazari' :
-             syncStatus === 'syncing' ? 'Syncing...' :
-             'Sync needed'}
+            {syncStatus === 'synced'
+              ? t('dashboard.syncSynced')
+              : syncStatus === 'syncing'
+                ? t('dashboard.syncSyncing')
+                : t('dashboard.syncNeeded')}
           </span>
           {stats?.pendingSync ? (
-            <span className="odoo-pending-badge">{stats.pendingSync} pending</span>
+            <span className="odoo-pending-badge">
+              {t('dashboard.pending', { count: stats.pendingSync })}
+            </span>
           ) : null}
         </div>
         <button
@@ -162,7 +167,7 @@ const OdooContent: React.FC = () => {
           disabled={syncStatus === 'syncing'}
         >
           <RefreshCw size={14} />
-          Sync Now
+          {t('dashboard.syncNow')}
         </button>
       </div>
 
@@ -175,7 +180,7 @@ const OdooContent: React.FC = () => {
           className="odoo-btn odoo-btn-primary odoo-btn-large"
         >
           <ExternalLink size={18} style={{ marginRight: '0.5rem' }} />
-          Open Odoo ERP
+          {t('dashboard.openOdoo')}
         </a>
 
         {/* Quick links to specific Odoo sections */}
@@ -187,7 +192,7 @@ const OdooContent: React.FC = () => {
             className="odoo-quick-link"
           >
             <Sun size={14} />
-            Sales
+            {t('dashboard.linkSales')}
           </a>
           <a
             href={`${tenantInfo.odooUrl}#menu_id=stock.menu_stock_root`}
@@ -196,7 +201,7 @@ const OdooContent: React.FC = () => {
             className="odoo-quick-link"
           >
             <Leaf size={14} />
-            Inventory
+            {t('dashboard.linkInventory')}
           </a>
           <a
             href={`${tenantInfo.odooUrl}#menu_id=account.menu_finance`}
@@ -205,7 +210,7 @@ const OdooContent: React.FC = () => {
             className="odoo-quick-link"
           >
             <FileText size={14} />
-            Accounting
+            {t('dashboard.linkAccounting')}
           </a>
         </div>
       </div>
@@ -214,7 +219,7 @@ const OdooContent: React.FC = () => {
       {tenantInfo.energyModulesEnabled && (
         <div className="odoo-info-panel">
           <Zap size={14} style={{ color: '#f59e0b' }} />
-          <span>Energy community modules enabled</span>
+          <span>{t('dashboard.energyModules')}</span>
         </div>
       )}
     </div>
@@ -222,6 +227,7 @@ const OdooContent: React.FC = () => {
 };
 
 const OdooHeader: React.FC = () => {
+  const { t } = useTranslation('odoo');
   const { tenantInfo } = useOdoo();
 
   return (
@@ -229,7 +235,7 @@ const OdooHeader: React.FC = () => {
       <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
         <Building2 size={28} />
         <div>
-          <h1>Odoo ERP</h1>
+          <h1>{t('dashboard.headerTitle')}</h1>
           {tenantInfo && (
             <span style={{ fontSize: '0.875rem', opacity: 0.8 }}>
               {tenantInfo.name}

@@ -10,6 +10,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from '@nekazari/sdk';
 import {
   RefreshCw,
   CheckCircle,
@@ -35,6 +36,7 @@ const OdooStatusWidget: React.FC<SlotWidgetProps> = ({
   selectedEntityId,
   selectedEntityType
 }) => {
+  const { t } = useTranslation('odoo');
   const [linkedEntity, setLinkedEntity] = useState<OdooEntity | null>(null);
   const [status, setStatus] = useState<EntityOdooStatus | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -103,11 +105,11 @@ const OdooStatusWidget: React.FC<SlotWidgetProps> = ({
       <div className="odoo-slot-widget">
         <div className="odoo-slot-header">
           <Clock size={20} className="odoo-slot-icon" />
-          <span>Odoo Status</span>
+          <span>{t('statusWidget.title')}</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem' }}>
           <RefreshCw size={16} className="animate-spin" />
-          <span style={{ fontSize: '0.875rem' }}>Loading status...</span>
+          <span style={{ fontSize: '0.875rem' }}>{t('statusWidget.loading')}</span>
         </div>
       </div>
     );
@@ -121,7 +123,7 @@ const OdooStatusWidget: React.FC<SlotWidgetProps> = ({
     <div className="odoo-slot-widget">
       <div className="odoo-slot-header">
         <Clock size={20} className="odoo-slot-icon" />
-        <span>Odoo Status</span>
+        <span>{t('statusWidget.title')}</span>
         <button
           onClick={handleSync}
           disabled={isSyncing}
@@ -132,7 +134,7 @@ const OdooStatusWidget: React.FC<SlotWidgetProps> = ({
             cursor: 'pointer',
             padding: '0.25rem'
           }}
-          title="Sync now"
+          title={t('statusWidget.syncNowTitle')}
         >
           <RefreshCw
             size={16}
@@ -147,7 +149,7 @@ const OdooStatusWidget: React.FC<SlotWidgetProps> = ({
           {/* Sync Status */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <CheckCircle size={16} style={{ color: 'var(--odoo-success)' }} />
-            <span style={{ fontSize: '0.875rem' }}>Synced</span>
+            <span style={{ fontSize: '0.875rem' }}>{t('statusWidget.synced')}</span>
             {status.lastActivity && (
               <span style={{ fontSize: '0.75rem', color: 'var(--odoo-text-muted)', marginLeft: 'auto' }}>
                 {new Date(status.lastActivity).toLocaleDateString()}
@@ -170,7 +172,9 @@ const OdooStatusWidget: React.FC<SlotWidgetProps> = ({
               >
                 <FileText size={16} style={{ color: 'var(--odoo-primary)' }} />
                 <span style={{ fontSize: '1rem', fontWeight: 600 }}>{status.invoiceCount}</span>
-                <span style={{ fontSize: '0.625rem', color: 'var(--odoo-text-muted)' }}>Invoices</span>
+                <span style={{ fontSize: '0.625rem', color: 'var(--odoo-text-muted)' }}>
+                  {t('statusWidget.invoices')}
+                </span>
               </div>
             )}
 
@@ -187,7 +191,9 @@ const OdooStatusWidget: React.FC<SlotWidgetProps> = ({
               >
                 <ShoppingCart size={16} style={{ color: 'var(--odoo-secondary)' }} />
                 <span style={{ fontSize: '1rem', fontWeight: 600 }}>{status.salesOrderCount}</span>
-                <span style={{ fontSize: '0.625rem', color: 'var(--odoo-text-muted)' }}>Orders</span>
+                <span style={{ fontSize: '0.625rem', color: 'var(--odoo-text-muted)' }}>
+                  {t('statusWidget.orders')}
+                </span>
               </div>
             )}
 
@@ -204,7 +210,9 @@ const OdooStatusWidget: React.FC<SlotWidgetProps> = ({
               >
                 <Wrench size={16} style={{ color: 'var(--odoo-warning)' }} />
                 <span style={{ fontSize: '1rem', fontWeight: 600 }}>{status.maintenanceCount}</span>
-                <span style={{ fontSize: '0.625rem', color: 'var(--odoo-text-muted)' }}>Maint.</span>
+                <span style={{ fontSize: '0.625rem', color: 'var(--odoo-text-muted)' }}>
+                  {t('statusWidget.maint')}
+                </span>
               </div>
             )}
           </div>

@@ -83,10 +83,6 @@ class OdooApiClient {
   }
 
   // Auth is handled via httpOnly cookie (credentials: 'include').
-  // getToken returns null — kept for getTenantId backward compat.
-  private getToken(): string | null {
-    return null;
-  }
 
   private getTenantId(): string | null {
     if (typeof window === 'undefined') return null;

@@ -9,7 +9,8 @@
  * @license AGPL-3.0
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { useTranslation } from '@nekazari/sdk';
 import {
   Building2,
   FileText,
@@ -32,6 +33,7 @@ interface QuickAction {
 }
 
 const OdooQuickActions: React.FC<SlotWidgetProps> = () => {
+  const { t } = useTranslation('odoo');
   const [stats, setStats] = useState<OdooStats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [odooBaseUrl, setOdooBaseUrl] = useState<string | null>(null);
@@ -56,42 +58,45 @@ const OdooQuickActions: React.FC<SlotWidgetProps> = () => {
     fetchData();
   }, []);
 
-  const quickActions: QuickAction[] = [
-    {
-      id: 'products',
-      label: 'Products',
-      icon: <Package size={18} />,
-      path: '/web#action=product.product_template_action',
-      badge: stats?.products
-    },
-    {
-      id: 'invoices',
-      label: 'Invoices',
-      icon: <FileText size={18} />,
-      path: '/web#action=account.action_move_out_invoice_type',
-      badge: stats?.invoices
-    },
-    {
-      id: 'assets',
-      label: 'Assets',
-      icon: <Building2 size={18} />,
-      path: '/web#action=maintenance.hr_equipment_action',
-      badge: stats?.assets
-    },
-    {
-      id: 'energy',
-      label: 'Energy Installations',
-      icon: <Sun size={18} />,
-      path: '/web#action=energy_community.action_energy_installation',
-      badge: stats?.energyInstallations
-    },
-    {
-      id: 'reports',
-      label: 'Reports',
-      icon: <TrendingUp size={18} />,
-      path: '/web#action=account_reports.action_account_report_bs'
-    }
-  ];
+  const quickActions: QuickAction[] = useMemo(
+    () => [
+      {
+        id: 'products',
+        label: t('quickActions.products'),
+        icon: <Package size={18} />,
+        path: '/web#action=product.product_template_action',
+        badge: stats?.products,
+      },
+      {
+        id: 'invoices',
+        label: t('quickActions.invoices'),
+        icon: <FileText size={18} />,
+        path: '/web#action=account.action_move_out_invoice_type',
+        badge: stats?.invoices,
+      },
+      {
+        id: 'assets',
+        label: t('quickActions.assets'),
+        icon: <Building2 size={18} />,
+        path: '/web#action=maintenance.hr_equipment_action',
+        badge: stats?.assets,
+      },
+      {
+        id: 'energy',
+        label: t('quickActions.energy'),
+        icon: <Sun size={18} />,
+        path: '/web#action=energy_community.action_energy_installation',
+        badge: stats?.energyInstallations,
+      },
+      {
+        id: 'reports',
+        label: t('quickActions.reports'),
+        icon: <TrendingUp size={18} />,
+        path: '/web#action=account_reports.action_account_report_bs',
+      },
+    ],
+    [t, stats]
+  );
 
   const handleActionClick = (action: QuickAction) => {
     if (odooBaseUrl) {
@@ -104,11 +109,11 @@ const OdooQuickActions: React.FC<SlotWidgetProps> = () => {
       <div className="odoo-slot-widget">
         <div className="odoo-slot-header">
           <Building2 size={20} className="odoo-slot-icon" />
-          <span>Odoo ERP</span>
+          <span>{t('quickActions.title')}</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem' }}>
           <RefreshCw size={16} className="animate-spin" />
-          <span style={{ fontSize: '0.875rem' }}>Loading...</span>
+          <span style={{ fontSize: '0.875rem' }}>{t('quickActions.loading')}</span>
         </div>
       </div>
     );
@@ -119,10 +124,10 @@ const OdooQuickActions: React.FC<SlotWidgetProps> = () => {
       <div className="odoo-slot-widget">
         <div className="odoo-slot-header">
           <Building2 size={20} className="odoo-slot-icon" />
-          <span>Odoo ERP</span>
+          <span>{t('quickActions.title')}</span>
         </div>
         <div style={{ padding: '0.5rem', fontSize: '0.875rem', color: 'var(--odoo-text-muted)' }}>
-          Odoo not configured for this tenant.
+          {t('quickActions.notConfigured')}
         </div>
       </div>
     );
@@ -132,13 +137,13 @@ const OdooQuickActions: React.FC<SlotWidgetProps> = () => {
     <div className="odoo-slot-widget">
       <div className="odoo-slot-header">
         <Building2 size={20} className="odoo-slot-icon" />
-        <span>Odoo ERP</span>
+        <span>{t('quickActions.title')}</span>
         <a
           href={odooBaseUrl}
           target="_blank"
           rel="noopener noreferrer"
           style={{ marginLeft: 'auto' }}
-          title="Open Odoo"
+          title={t('quickActions.openOdooTitle')}
         >
           <ExternalLink size={16} style={{ color: 'var(--odoo-text-muted)' }} />
         </a>
@@ -179,7 +184,7 @@ const OdooQuickActions: React.FC<SlotWidgetProps> = () => {
           }}
         >
           <RefreshCw size={14} />
-          <span>{stats.pendingSync} entities pending sync</span>
+          <span>{t('quickActions.pendingSync', { count: stats.pendingSync })}</span>
         </div>
       )}
     </div>
