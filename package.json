@@ -24,6 +24,7 @@
     "react-router-dom": "^6.26.0"
   },
   "devDependencies": {
+    "@nekazari/sdk": "^1.0.5",
     "@originjs/vite-plugin-federation": "^1.3.5",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",

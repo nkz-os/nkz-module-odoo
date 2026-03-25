@@ -11,6 +11,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Building2, ExternalLink, Plus, RefreshCw, Package, Zap, Tractor } from 'lucide-react';
+import { useTranslation } from '@nekazari/sdk';
 import { SlotWidgetProps } from '../../slots/types';
 import { odooApi, OdooEntity } from '../../services/api';
 
@@ -34,6 +35,7 @@ const OdooEntityLink: React.FC<SlotWidgetProps> = ({
   selectedEntityId,
   selectedEntityType
 }) => {
+  const { t } = useTranslation('odoo');
   const [linkedEntity, setLinkedEntity] = useState<OdooEntity | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
@@ -53,7 +55,7 @@ const OdooEntityLink: React.FC<SlotWidgetProps> = ({
         const entity = await odooApi.getOdooEntityForNgsiLd(selectedEntityId);
         setLinkedEntity(entity);
       } catch (err) {
-        setError('Failed to fetch Odoo link');
+        setError(t('entityLink.errorFetch'));
         setLinkedEntity(null);
       } finally {
         setIsLoading(false);
@@ -76,7 +78,7 @@ const OdooEntityLink: React.FC<SlotWidgetProps> = ({
       );
       setLinkedEntity(entity);
     } catch (err) {
-      setError('Failed to create Odoo record');
+      setError(t('entityLink.errorCreate'));
     } finally {
       setIsCreating(false);
     }
@@ -92,7 +94,7 @@ const OdooEntityLink: React.FC<SlotWidgetProps> = ({
       );
       window.open(url, '_blank');
     } catch (err) {
-      setError('Failed to open in Odoo');
+      setError(t('entityLink.errorOpen'));
     }
   };
 
@@ -107,13 +109,13 @@ const OdooEntityLink: React.FC<SlotWidgetProps> = ({
     <div className="odoo-slot-widget">
       <div className="odoo-slot-header">
         <Building2 size={20} className="odoo-slot-icon" />
-        <span>Odoo ERP</span>
+        <span>{t('entityLink.title')}</span>
       </div>
 
       {isLoading ? (
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem' }}>
           <RefreshCw size={16} className="animate-spin" />
-          <span>Loading...</span>
+          <span>{t('entityLink.loading')}</span>
         </div>
       ) : error ? (
         <div style={{ color: 'var(--odoo-danger)', padding: '0.5rem', fontSize: '0.875rem' }}>
@@ -135,13 +137,17 @@ const OdooEntityLink: React.FC<SlotWidgetProps> = ({
           </div>
 
           <div style={{ fontSize: '0.75rem', color: 'var(--odoo-text-muted)', padding: '0.25rem 0.5rem' }}>
-            Last synced: {linkedEntity.lastSync ? new Date(linkedEntity.lastSync).toLocaleString() : 'Never'}
+            {t('entityLink.lastSynced', {
+              date: linkedEntity.lastSync
+                ? new Date(linkedEntity.lastSync).toLocaleString()
+                : t('entityLink.never'),
+            })}
           </div>
         </div>
       ) : (
         <div style={{ padding: '0.5rem' }}>
           <p style={{ fontSize: '0.875rem', marginBottom: '0.5rem', color: 'var(--odoo-text-muted)' }}>
-            No Odoo record linked to this entity.
+            {t('entityLink.noRecord')}
           </p>
           <button
             className="odoo-btn odoo-btn-primary"
@@ -152,12 +158,12 @@ const OdooEntityLink: React.FC<SlotWidgetProps> = ({
             {isCreating ? (
               <>
                 <RefreshCw size={16} className="animate-spin" />
-                Creating...
+                {t('entityLink.creating')}
               </>
             ) : (
               <>
                 <Plus size={16} />
-                Create in Odoo ({expectedModel})
+                {t('entityLink.createInOdoo', { model: expectedModel })}
               </>
             )}
           </button>
