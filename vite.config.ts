@@ -64,10 +64,18 @@ export default defineConfig({
     minify: false,
     cssCodeSplit: false,
     rollupOptions: {
+      external: [
+        '@nekazari/design-tokens',
+        '@nekazari/viewer-kit',
+      ],
       output: {
         format: 'esm',
         entryFileNames: 'assets/[name].js',
-        chunkFileNames: 'assets/[name].js'
+        chunkFileNames: 'assets/[name].js',
+        globals: {
+          '@nekazari/design-tokens': '__NKZ_DESIGN_TOKENS__',
+          '@nekazari/viewer-kit': '__NKZ_VIEWER_KIT__',
+        },
       }
     }
   },

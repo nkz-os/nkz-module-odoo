@@ -17,7 +17,6 @@ import {
   CheckCircle2, Clock
 } from 'lucide-react';
 import { OdooProvider, useOdoo } from './services/context';
-import './index.css';
 
 const StatCard: React.FC<{
   icon: React.ReactNode;

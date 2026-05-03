@@ -23,7 +23,6 @@ import {
 } from 'lucide-react';
 import { useTranslation } from '@nekazari/sdk';
 import { OdooProvider, useOdoo } from './services/context';
-import './index.css';
 
 function OdooModulePageContent() {
   const { t } = useTranslation('odoo');

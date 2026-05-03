@@ -2,15 +2,12 @@
  * Nekazari Odoo ERP Module - Slot Registration
  *
  * Exports viewerSlots for host integration with Unified Viewer.
- *
- * @author Kate Benetis <kate@robotika.cloud>
- * @company Robotika
- * @license AGPL-3.0
  */
 
 import { ModuleViewerSlots } from './types';
 import OdooEntityLink from '../components/slots/OdooEntityLink';
 import OdooStatusWidget from '../components/slots/OdooStatusWidget';
+import OdooQuickActions from '../components/slots/OdooQuickActions';
 import { OdooProvider } from '../services/context';
 
 const MODULE_ID = 'odoo-erp';
@@ -43,10 +40,15 @@ export const viewerSlots: ModuleViewerSlots = {
 
   'bottom-panel': [],
 
-  // entity-tree is intentionally empty: OdooQuickActions belongs on the /odoo
-  // module page, not in the viewer sidebar. The viewer sidebar is reserved for
-  // the core entity tree (CoreEntityTree, priority 0).
-  'entity-tree': [],
+  'entity-tree': [
+    {
+      id: 'odoo-quick-actions',
+      moduleId: MODULE_ID,
+      component: 'OdooQuickActions',
+      priority: 50,
+      localComponent: OdooQuickActions,
+    }
+  ],
 
   'map-layer': [],
 
