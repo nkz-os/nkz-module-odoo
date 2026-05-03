@@ -3,14 +3,12 @@
  *
  * Provides quick access to common Odoo operations.
  * Displayed in the entity tree panel.
- *
- * @author Kate Benetis <kate@robotika.cloud>
- * @company Robotika
- * @license AGPL-3.0
  */
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from '@nekazari/sdk';
+import { SlotShellCompact } from '@nekazari/viewer-kit';
+import { Badge, Spinner, Stack, IconButton } from '@nekazari/ui-kit';
 import {
   Building2,
   FileText,
@@ -23,6 +21,8 @@ import {
 } from 'lucide-react';
 import { SlotWidgetProps } from '../../slots/types';
 import { odooApi, OdooStats } from '../../services/api';
+
+const odooAccent = { base: '#6366F1', soft: '#E0E7FF', strong: '#4338CA' };
 
 interface QuickAction {
   id: string;
@@ -106,88 +106,81 @@ const OdooQuickActions: React.FC<SlotWidgetProps> = () => {
 
   if (isLoading) {
     return (
-      <div className="odoo-slot-widget">
-        <div className="odoo-slot-header">
-          <Building2 size={20} className="odoo-slot-icon" />
-          <span>{t('quickActions.title')}</span>
+      <SlotShellCompact moduleId="odoo-erp" accent={odooAccent}>
+        <div className="flex items-center gap-2">
+          <Building2 size={20} className="text-nkz-accent-base" />
+          <span className="text-nkz-sm font-medium text-nkz-text-primary">{t('quickActions.title')}</span>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem' }}>
-          <RefreshCw size={16} className="animate-spin" />
-          <span style={{ fontSize: '0.875rem' }}>{t('quickActions.loading')}</span>
+        <div className="flex items-center gap-2 p-nkz-inline">
+          <Spinner size="sm" />
+          <span className="text-nkz-sm text-nkz-text-secondary">{t('quickActions.loading')}</span>
         </div>
-      </div>
+      </SlotShellCompact>
     );
   }
 
   if (!odooBaseUrl) {
     return (
-      <div className="odoo-slot-widget">
-        <div className="odoo-slot-header">
-          <Building2 size={20} className="odoo-slot-icon" />
-          <span>{t('quickActions.title')}</span>
+      <SlotShellCompact moduleId="odoo-erp" accent={odooAccent}>
+        <div className="flex items-center gap-2">
+          <Building2 size={20} className="text-nkz-accent-base" />
+          <span className="text-nkz-sm font-medium text-nkz-text-primary">{t('quickActions.title')}</span>
         </div>
-        <div style={{ padding: '0.5rem', fontSize: '0.875rem', color: 'var(--odoo-text-muted)' }}>
+        <div className="text-nkz-sm text-nkz-text-muted p-nkz-inline">
           {t('quickActions.notConfigured')}
         </div>
-      </div>
+      </SlotShellCompact>
     );
   }
 
   return (
-    <div className="odoo-slot-widget">
-      <div className="odoo-slot-header">
-        <Building2 size={20} className="odoo-slot-icon" />
-        <span>{t('quickActions.title')}</span>
+    <SlotShellCompact moduleId="odoo-erp" accent={odooAccent}>
+      <div className="flex items-center justify-between mb-1">
+        <div className="flex items-center gap-2">
+          <Building2 size={20} className="text-nkz-accent-base" />
+          <span className="text-nkz-sm font-medium text-nkz-text-primary">{t('quickActions.title')}</span>
+        </div>
         <a
           href={odooBaseUrl}
           target="_blank"
           rel="noopener noreferrer"
-          style={{ marginLeft: 'auto' }}
+          className="text-nkz-text-muted hover:text-nkz-accent-base"
           title={t('quickActions.openOdooTitle')}
         >
-          <ExternalLink size={16} style={{ color: 'var(--odoo-text-muted)' }} />
+          <ExternalLink size={16} />
         </a>
       </div>
 
-      <div className="odoo-link-list">
+      <Stack gap="tight">
         {quickActions.map((action) => (
           <div
             key={action.id}
-            className="odoo-link-item"
+            className="flex items-center justify-between p-nkz-inline bg-nkz-surface-sunken rounded-nkz-md hover:bg-nkz-surface transition-colors cursor-pointer"
             onClick={() => handleActionClick(action)}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <span style={{ color: 'var(--odoo-primary)' }}>{action.icon}</span>
-              <span>{action.label}</span>
+            <div className="flex items-center gap-2">
+              <span className="text-nkz-accent-base">{action.icon}</span>
+              <span className="text-nkz-sm text-nkz-text-primary">{action.label}</span>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <div className="flex items-center gap-2">
               {action.badge !== undefined && (
-                <span className="odoo-badge odoo-badge-info">{action.badge}</span>
+                <span className="bg-nkz-accent-soft text-nkz-accent-strong text-nkz-xs px-nkz-inline py-0.5 rounded-nkz-full font-medium">
+                  {action.badge}
+                </span>
               )}
-              <ChevronRight size={16} style={{ color: 'var(--odoo-text-muted)' }} />
+              <ChevronRight size={16} className="text-nkz-text-muted" />
             </div>
           </div>
         ))}
-      </div>
+      </Stack>
 
       {stats?.pendingSync && stats.pendingSync > 0 && (
-        <div
-          style={{
-            marginTop: '0.5rem',
-            padding: '0.5rem',
-            background: 'var(--odoo-warning)',
-            borderRadius: '0.25rem',
-            fontSize: '0.75rem',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem'
-          }}
-        >
-          <RefreshCw size={14} />
-          <span>{t('quickActions.pendingSync', { count: stats.pendingSync })}</span>
+        <div className="mt-2 p-nkz-inline bg-nkz-warning-soft rounded-nkz-md text-nkz-xs flex items-center gap-2 border border-nkz-warning">
+          <RefreshCw size={14} className="text-nkz-warning" />
+          <span className="text-nkz-warning-strong">{t('quickActions.pendingSync', { count: stats.pendingSync })}</span>
         </div>
       )}
-    </div>
+    </SlotShellCompact>
   );
 };
 

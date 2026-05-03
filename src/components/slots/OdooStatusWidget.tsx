@@ -3,14 +3,12 @@
  *
  * Shows sync status and quick stats for the selected entity.
  * Displayed in the context panel.
- *
- * @author Kate Benetis <kate@robotika.cloud>
- * @company Robotika
- * @license AGPL-3.0
  */
 
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from '@nekazari/sdk';
+import { SlotShell } from '@nekazari/viewer-kit';
+import { Badge, Spinner, Stack, IconButton } from '@nekazari/ui-kit';
 import {
   RefreshCw,
   CheckCircle,
@@ -21,6 +19,8 @@ import {
 } from 'lucide-react';
 import { SlotWidgetProps } from '../../slots/types';
 import { odooApi, OdooEntity } from '../../services/api';
+
+const odooAccent = { base: '#6366F1', soft: '#E0E7FF', strong: '#4338CA' };
 
 interface EntityOdooStatus {
   hasInvoices: boolean;
@@ -57,8 +57,6 @@ const OdooStatusWidget: React.FC<SlotWidgetProps> = ({
         setLinkedEntity(entity);
 
         if (entity) {
-          // In a real implementation, this would fetch actual status from Odoo
-          // For now, we'll simulate the status
           setStatus({
             hasInvoices: Math.random() > 0.5,
             invoiceCount: Math.floor(Math.random() * 10),
@@ -86,7 +84,6 @@ const OdooStatusWidget: React.FC<SlotWidgetProps> = ({
 
     try {
       await odooApi.triggerSync();
-      // Refresh status after sync
       const entity = await odooApi.getOdooEntityForNgsiLd(selectedEntityId!);
       setLinkedEntity(entity);
     } catch (err) {
@@ -102,123 +99,85 @@ const OdooStatusWidget: React.FC<SlotWidgetProps> = ({
 
   if (isLoading) {
     return (
-      <div className="odoo-slot-widget">
-        <div className="odoo-slot-header">
-          <Clock size={20} className="odoo-slot-icon" />
-          <span>{t('statusWidget.title')}</span>
+      <SlotShell
+        title={t('statusWidget.title')}
+        icon={<Clock className="w-4 h-4" />}
+        collapsible
+        accent={odooAccent}
+      >
+        <div className="flex items-center gap-2 p-nkz-inline">
+          <Spinner size="sm" />
+          <span className="text-nkz-sm text-nkz-text-secondary">{t('statusWidget.loading')}</span>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem' }}>
-          <RefreshCw size={16} className="animate-spin" />
-          <span style={{ fontSize: '0.875rem' }}>{t('statusWidget.loading')}</span>
-        </div>
-      </div>
+      </SlotShell>
     );
   }
 
   if (!linkedEntity) {
-    return null; // OdooEntityLink widget will handle the "not linked" case
+    return null;
   }
 
   return (
-    <div className="odoo-slot-widget">
-      <div className="odoo-slot-header">
-        <Clock size={20} className="odoo-slot-icon" />
-        <span>{t('statusWidget.title')}</span>
-        <button
-          onClick={handleSync}
-          disabled={isSyncing}
-          style={{
-            marginLeft: 'auto',
-            background: 'none',
-            border: 'none',
-            cursor: 'pointer',
-            padding: '0.25rem'
-          }}
-          title={t('statusWidget.syncNowTitle')}
-        >
-          <RefreshCw
-            size={16}
-            style={{ color: 'var(--odoo-primary)' }}
-            className={isSyncing ? 'animate-spin' : ''}
-          />
-        </button>
-      </div>
+    <SlotShell
+      title={t('statusWidget.title')}
+      icon={<Clock className="w-4 h-4" />}
+      collapsible
+      accent={odooAccent}
+    >
+      <Stack gap="inline">
+        {/* Sync Status */}
+        <div className="flex items-center gap-2">
+          <CheckCircle size={16} className="text-nkz-success" />
+          <span className="text-nkz-sm text-nkz-text-primary">{t('statusWidget.synced')}</span>
+          {status?.lastActivity && (
+            <span className="text-nkz-xs text-nkz-text-muted ml-auto">
+              {new Date(status.lastActivity).toLocaleDateString()}
+            </span>
+          )}
+        </div>
 
-      {status && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', padding: '0.5rem 0' }}>
-          {/* Sync Status */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <CheckCircle size={16} style={{ color: 'var(--odoo-success)' }} />
-            <span style={{ fontSize: '0.875rem' }}>{t('statusWidget.synced')}</span>
-            {status.lastActivity && (
-              <span style={{ fontSize: '0.75rem', color: 'var(--odoo-text-muted)', marginLeft: 'auto' }}>
-                {new Date(status.lastActivity).toLocaleDateString()}
-              </span>
-            )}
-          </div>
-
-          {/* Quick Stats */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.5rem', marginTop: '0.5rem' }}>
+        {/* Quick Stats Grid */}
+        {status && (
+          <div className="grid grid-cols-3 gap-2 mt-1">
             {status.hasInvoices && (
-              <div
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  padding: '0.5rem',
-                  background: 'var(--odoo-bg)',
-                  borderRadius: '0.25rem'
-                }}
-              >
-                <FileText size={16} style={{ color: 'var(--odoo-primary)' }} />
-                <span style={{ fontSize: '1rem', fontWeight: 600 }}>{status.invoiceCount}</span>
-                <span style={{ fontSize: '0.625rem', color: 'var(--odoo-text-muted)' }}>
-                  {t('statusWidget.invoices')}
-                </span>
+              <div className="flex flex-col items-center p-nkz-inline bg-nkz-surface-sunken rounded-nkz-md">
+                <FileText size={16} className="text-nkz-accent-base" />
+                <span className="text-nkz-sm font-semibold text-nkz-text-primary">{status.invoiceCount}</span>
+                <span className="text-nkz-xs text-nkz-text-muted">{t('statusWidget.invoices')}</span>
               </div>
             )}
 
             {status.hasSalesOrders && (
-              <div
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  padding: '0.5rem',
-                  background: 'var(--odoo-bg)',
-                  borderRadius: '0.25rem'
-                }}
-              >
-                <ShoppingCart size={16} style={{ color: 'var(--odoo-secondary)' }} />
-                <span style={{ fontSize: '1rem', fontWeight: 600 }}>{status.salesOrderCount}</span>
-                <span style={{ fontSize: '0.625rem', color: 'var(--odoo-text-muted)' }}>
-                  {t('statusWidget.orders')}
-                </span>
+              <div className="flex flex-col items-center p-nkz-inline bg-nkz-surface-sunken rounded-nkz-md">
+                <ShoppingCart size={16} className="text-nkz-accent-base" />
+                <span className="text-nkz-sm font-semibold text-nkz-text-primary">{status.salesOrderCount}</span>
+                <span className="text-nkz-xs text-nkz-text-muted">{t('statusWidget.orders')}</span>
               </div>
             )}
 
             {status.hasMaintenanceRecords && (
-              <div
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  padding: '0.5rem',
-                  background: 'var(--odoo-bg)',
-                  borderRadius: '0.25rem'
-                }}
-              >
-                <Wrench size={16} style={{ color: 'var(--odoo-warning)' }} />
-                <span style={{ fontSize: '1rem', fontWeight: 600 }}>{status.maintenanceCount}</span>
-                <span style={{ fontSize: '0.625rem', color: 'var(--odoo-text-muted)' }}>
-                  {t('statusWidget.maint')}
-                </span>
+              <div className="flex flex-col items-center p-nkz-inline bg-nkz-surface-sunken rounded-nkz-md">
+                <Wrench size={16} className="text-nkz-warning" />
+                <span className="text-nkz-sm font-semibold text-nkz-text-primary">{status.maintenanceCount}</span>
+                <span className="text-nkz-xs text-nkz-text-muted">{t('statusWidget.maint')}</span>
               </div>
             )}
           </div>
+        )}
+
+        {/* Sync button */}
+        <div className="flex justify-end">
+          <IconButton
+            aria-label={t('statusWidget.syncNowTitle')}
+            size="sm"
+            onClick={handleSync}
+            disabled={isSyncing}
+          >
+            <RefreshCw size={16} className={isSyncing ? 'animate-spin' : ''} />
+          </IconButton>
         </div>
-      )}
-    </div>
+      </Stack>
+    </SlotShell>
   );
 };
 

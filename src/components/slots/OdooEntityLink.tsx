@@ -3,17 +3,17 @@
  *
  * Shows linked Odoo records for the selected NGSI-LD entity.
  * Displayed in the context panel when an entity is selected.
- *
- * @author Kate Benetis <kate@robotika.cloud>
- * @company Robotika
- * @license AGPL-3.0
  */
 
 import React, { useState, useEffect } from 'react';
 import { Building2, ExternalLink, Plus, RefreshCw, Package, Zap, Tractor } from 'lucide-react';
 import { useTranslation } from '@nekazari/sdk';
+import { SlotShell } from '@nekazari/viewer-kit';
+import { Button, Spinner, Badge, Stack } from '@nekazari/ui-kit';
 import { SlotWidgetProps } from '../../slots/types';
 import { odooApi, OdooEntity } from '../../services/api';
+
+const odooAccent = { base: '#6366F1', soft: '#E0E7FF', strong: '#4338CA' };
 
 const ENTITY_TYPE_ICONS: Record<string, React.ReactNode> = {
   AgriParcel: <Tractor size={16} />,
@@ -106,70 +106,64 @@ const OdooEntityLink: React.FC<SlotWidgetProps> = ({
   const expectedModel = ENTITY_TYPE_ODOO_MODEL[selectedEntityType] || 'product.template';
 
   return (
-    <div className="odoo-slot-widget">
-      <div className="odoo-slot-header">
-        <Building2 size={20} className="odoo-slot-icon" />
-        <span>{t('entityLink.title')}</span>
-      </div>
-
+    <SlotShell
+      title={t('entityLink.title')}
+      icon={<Building2 className="w-4 h-4" />}
+      collapsible
+      accent={odooAccent}
+    >
       {isLoading ? (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem' }}>
-          <RefreshCw size={16} className="animate-spin" />
-          <span>{t('entityLink.loading')}</span>
+        <div className="flex items-center gap-2 p-nkz-inline">
+          <Spinner size="sm" />
+          <span className="text-nkz-sm text-nkz-text-secondary">{t('entityLink.loading')}</span>
         </div>
       ) : error ? (
-        <div style={{ color: 'var(--odoo-danger)', padding: '0.5rem', fontSize: '0.875rem' }}>
+        <Badge intent="negative" className="p-nkz-inline">
           {error}
-        </div>
+        </Badge>
       ) : linkedEntity ? (
-        <div className="odoo-link-list">
-          <div className="odoo-link-item" onClick={handleOpenInOdoo}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              {icon}
+        <Stack gap="tight">
+          <div
+            className="flex items-center justify-between p-nkz-inline bg-nkz-surface-sunken rounded-nkz-md hover:bg-nkz-surface transition-colors cursor-pointer"
+            onClick={handleOpenInOdoo}
+          >
+            <div className="flex items-center gap-2">
+              <span className="text-nkz-accent-base">{icon}</span>
               <div>
-                <div style={{ fontWeight: 500 }}>{linkedEntity.odooName}</div>
-                <div style={{ fontSize: '0.75rem', color: 'var(--odoo-text-muted)' }}>
+                <div className="text-nkz-sm font-medium text-nkz-text-primary">{linkedEntity.odooName}</div>
+                <div className="text-nkz-xs text-nkz-text-muted">
                   {linkedEntity.odooModel} #{linkedEntity.odooId}
                 </div>
               </div>
             </div>
-            <ExternalLink size={16} style={{ color: 'var(--odoo-text-muted)' }} />
+            <ExternalLink size={16} className="text-nkz-text-muted" />
           </div>
 
-          <div style={{ fontSize: '0.75rem', color: 'var(--odoo-text-muted)', padding: '0.25rem 0.5rem' }}>
+          <div className="text-nkz-xs text-nkz-text-muted px-nkz-inline">
             {t('entityLink.lastSynced', {
               date: linkedEntity.lastSync
                 ? new Date(linkedEntity.lastSync).toLocaleString()
                 : t('entityLink.never'),
             })}
           </div>
-        </div>
+        </Stack>
       ) : (
-        <div style={{ padding: '0.5rem' }}>
-          <p style={{ fontSize: '0.875rem', marginBottom: '0.5rem', color: 'var(--odoo-text-muted)' }}>
+        <Stack gap="inline">
+          <p className="text-nkz-sm text-nkz-text-muted">
             {t('entityLink.noRecord')}
           </p>
-          <button
-            className="odoo-btn odoo-btn-primary"
+          <Button
+            variant="primary"
+            size="sm"
             onClick={handleCreateLink}
             disabled={isCreating}
-            style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
+            leadingIcon={isCreating ? <RefreshCw size={16} className="animate-spin" /> : <Plus size={16} />}
           >
-            {isCreating ? (
-              <>
-                <RefreshCw size={16} className="animate-spin" />
-                {t('entityLink.creating')}
-              </>
-            ) : (
-              <>
-                <Plus size={16} />
-                {t('entityLink.createInOdoo', { model: expectedModel })}
-              </>
-            )}
-          </button>
-        </div>
+            {isCreating ? t('entityLink.creating') : t('entityLink.createInOdoo', { model: expectedModel })}
+          </Button>
+        </Stack>
       )}
-    </div>
+    </SlotShell>
   );
 };
 

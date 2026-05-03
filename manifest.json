@@ -21,6 +21,11 @@
   "company_logo_url": "/modules/odoo-erp/assets/robotika-logo.png",
 
   "route_path": "/odoo",
+  "accent": {
+    "base": "#6366F1",
+    "soft": "#E0E7FF",
+    "strong": "#4338CA"
+  },
   "label": "Odoo ERP",
   "navigation": {
     "enabled": true,
@@ -60,6 +65,16 @@
         "id": "odoo-entity-link",
         "component": "OdooEntityLink",
         "priority": 60,
+        "tab": "ERP",
+        "showWhen": {
+          "entityType": ["AgriParcel", "Device", "Building"]
+        }
+      },
+      {
+        "id": "odoo-status-widget",
+        "component": "OdooStatusWidget",
+        "priority": 70,
+        "tab": "ERP",
         "showWhen": {
           "entityType": ["AgriParcel", "Device", "Building"]
         }
@@ -132,5 +147,41 @@
       "assets/screenshot-farm.png"
     ],
     "documentation_url": "https://github.com/nkz-os/nkz-module-odoo#readme"
+  },
+  "surfaces": {
+    "web": {
+      "slots": {
+        "context-panel": [
+          {
+            "id": "odoo-entity-link",
+            "component": "OdooEntityLink",
+            "priority": 60,
+            "tab": "ERP",
+            "showWhen": {
+              "entityType": ["AgriParcel", "Device", "Building"]
+            }
+          },
+          {
+            "id": "odoo-status-widget",
+            "component": "OdooStatusWidget",
+            "priority": 70,
+            "tab": "ERP",
+            "showWhen": {
+              "entityType": ["AgriParcel", "Device", "Building"]
+            }
+          }
+        ],
+        "entity-tree": [
+          {
+            "id": "odoo-quick-actions",
+            "component": "OdooQuickActions",
+            "priority": 50
+          }
+        ],
+        "layer-toggle": [],
+        "bottom-panel": [],
+        "map-layer": []
+      }
+    }
   }
 }
