@@ -13,6 +13,8 @@ import logging
 from typing import Optional, Any
 from datetime import datetime
 import httpx
+import re
+import os
 
 from app.config import settings
 from app.services.odoo_client import OdooClient
@@ -23,6 +25,22 @@ from app.services.database import (
 )
 
 logger = logging.getLogger(__name__)
+
+
+def _make_headers(tenant_id: str) -> dict:
+    n = tenant_id.lower().strip().replace('-', '_').replace(' ', '_')
+    n = re.sub(r'[^a-z0-9_]', '', n)
+    n = n.strip('_') or tenant_id
+    headers = {
+        "NGSILD-Tenant": n,
+        "Fiware-Service": n,
+        "Fiware-ServicePath": "/",
+        "Accept": "application/ld+json",
+    }
+    ctx = os.getenv("CONTEXT_URL", "")
+    if ctx:
+        headers["Link"] = f'<{ctx}>; rel="http://www.w3.org/ns/json-ld#context"; type="application/ld+json"'
+    return headers
 
 
 # Mapping from NGSI-LD types to Odoo models
@@ -71,10 +89,7 @@ class NgsildSyncService:
         async with httpx.AsyncClient() as client:
             response = await client.get(
                 url,
-                headers={
-                    "Accept": "application/ld+json",
-                    "NGSILD-Tenant": self.tenant_id
-                }
+                headers=_make_headers(self.tenant_id)
             )
 
             if response.status_code == 200:
@@ -102,10 +117,7 @@ class NgsildSyncService:
             response = await client.get(
                 url,
                 params=params,
-                headers={
-                    "Accept": "application/ld+json",
-                    "NGSILD-Tenant": self.tenant_id
-                }
+                headers=_make_headers(self.tenant_id)
             )
 
             if response.status_code == 200:
@@ -366,10 +378,7 @@ async def register_tenant_subscriptions(tenant_id: str):
             response = await client.post(
                 f"{settings.ORION_URL}/ngsi-ld/v1/subscriptions",
                 json=subscription,
-                headers={
-                    "Content-Type": "application/ld+json",
-                    "NGSILD-Tenant": tenant_id
-                }
+                headers={**_make_headers(tenant_id), "Content-Type": "application/ld+json"}
             )
 
             if response.status_code in [201, 409]:  # Created or already exists
@@ -388,7 +397,7 @@ async def remove_tenant_subscriptions(tenant_id: str):
         async with httpx.AsyncClient() as client:
             response = await client.delete(
                 f"{settings.ORION_URL}/ngsi-ld/v1/subscriptions/{sub_id}",
-                headers={"NGSILD-Tenant": tenant_id}
+                headers=_make_headers(tenant_id)
             )
 
             if response.status_code in [204, 404]:
