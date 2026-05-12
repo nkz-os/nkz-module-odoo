@@ -1,3 +1,4 @@
+import { defineModule } from "@nekazari/module-kit";
 /**
  * IIFE entry point — host loads this bundle via <script src="/modules/odoo-erp/nkz-module.js">.
  * Registers the module with window.__NKZ__ so slots appear in the viewer.

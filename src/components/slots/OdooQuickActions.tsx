@@ -8,7 +8,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from '@nekazari/sdk';
 import { SlotShellCompact } from '@nekazari/viewer-kit';
-import { Badge, Spinner, Stack, IconButton } from '@nekazari/ui-kit';
+import { Spinner, Stack } from '@nekazari/ui-kit';
 import {
   Building2,
   FileText,
