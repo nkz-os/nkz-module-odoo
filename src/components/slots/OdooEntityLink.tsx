@@ -107,6 +107,7 @@ const OdooEntityLink: React.FC<SlotWidgetProps> = ({
 
   return (
     <SlotShell
+      moduleId="odoo-erp"
       title={t('entityLink.title')}
       icon={<Building2 className="w-4 h-4" />}
       collapsible

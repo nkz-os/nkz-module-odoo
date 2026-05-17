@@ -8,7 +8,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from '@nekazari/sdk';
 import { SlotShell } from '@nekazari/viewer-kit';
-import { Badge, Spinner, Stack, IconButton } from '@nekazari/ui-kit';
+import { Spinner, Stack } from '@nekazari/ui-kit';
 import {
   RefreshCw,
   CheckCircle,
@@ -100,6 +100,7 @@ const OdooStatusWidget: React.FC<SlotWidgetProps> = ({
   if (isLoading) {
     return (
       <SlotShell
+        moduleId="odoo-erp"
         title={t('statusWidget.title')}
         icon={<Clock className="w-4 h-4" />}
         collapsible
@@ -119,6 +120,7 @@ const OdooStatusWidget: React.FC<SlotWidgetProps> = ({
 
   return (
     <SlotShell
+      moduleId="odoo-erp"
       title={t('statusWidget.title')}
       icon={<Clock className="w-4 h-4" />}
       collapsible
@@ -167,14 +169,14 @@ const OdooStatusWidget: React.FC<SlotWidgetProps> = ({
 
         {/* Sync button */}
         <div className="flex justify-end">
-          <IconButton
+          <button
+            className="p-1.5 rounded-md text-nkz-text-secondary hover:text-nkz-text-primary hover:bg-nkz-surface-sunken transition-colors"
             aria-label={t('statusWidget.syncNowTitle')}
-            size="sm"
             onClick={handleSync}
             disabled={isSyncing}
           >
             <RefreshCw size={16} className={isSyncing ? 'animate-spin' : ''} />
-          </IconButton>
+          </button>
         </div>
       </Stack>
     </SlotShell>
