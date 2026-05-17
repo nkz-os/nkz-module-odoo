@@ -9,17 +9,22 @@
   },
   "license": "AGPL-3.0",
   "type": "module",
+  "main": "./src/Module.tsx",
+  "nkz": {
+    "moduleId": "odoo-erp"
+  },
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
-    "build:module": "vite build --config vite.module.config.ts",
+    "build": "vite build",
+    "build:module": "vite build",
     "preview": "vite preview",
     "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
-    "@nekazari/design-tokens": "^0.1.0-alpha",
-    "@nekazari/viewer-kit": "^0.1.0-alpha",
+    "@nekazari/design-tokens": "^0.1.0-alpha.0",
+    "@nekazari/ui-kit": "^1.0.2-alpha.4",
+    "@nekazari/viewer-kit": "^0.1.1-alpha.0",
     "lucide-react": "^0.424.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
@@ -27,8 +32,7 @@
   },
   "devDependencies": {
     "@nekazari/sdk": "^1.0.5",
-    "@nekazari/ui-kit": "^1.0.2-alpha.0",
-    "@originjs/vite-plugin-federation": "^1.3.5",
+    "@nekazari/module-builder": "^2.0.0",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
     "@typescript-eslint/eslint-plugin": "^7.15.0",
@@ -42,7 +46,7 @@
     "tailwindcss": "^3.4.6",
     "typescript": "^5.5.3",
     "vite": "^5.3.4",
-    "vite-plugin-css-injected-by-js": "^4.0.1"
+    "@nekazari/module-kit": "^0.6.0"
   },
   "peerDependencies": {
     "react": "^18.3.1",
