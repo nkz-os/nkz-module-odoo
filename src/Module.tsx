@@ -1,4 +1,4 @@
-import { defineModule } from '@nekazari/module-kit';
+import { defineModule, withModuleProvider } from '@nekazari/module-kit';
 import React, { lazy, Suspense } from 'react';
 import './i18n';
 import { viewerSlots } from './slots';
@@ -15,26 +15,6 @@ const MainWrapper: React.FC = () => (
   </OdooProvider>
 );
 
-// OdooProvider was previously slots.moduleProvider. SlotsSchema only allows slot
-// arrays; federated widgets mount into their own React trees, so wrap each
-// localComponent so widgets get the provider on mount.
-const { moduleProvider: _moduleProvider, ...rawSlots } = viewerSlots as Record<string, unknown>;
-const wrappedSlots = Object.fromEntries(
-  Object.entries(rawSlots).map(([slot, entries]) => [
-    slot,
-    (entries as Array<Record<string, any>>).map((entry) => {
-      const Inner = entry.localComponent as React.ComponentType<any> | undefined;
-      if (!Inner) return entry;
-      const Wrapped: React.FC<any> = (props) => (
-        <OdooProvider>
-          <Inner {...props} />
-        </OdooProvider>
-      );
-      return { ...entry, localComponent: Wrapped };
-    }),
-  ]),
-);
-
 export default defineModule({
   id: 'odoo-erp',
   displayName: 'Odoo ERP',
@@ -45,5 +25,5 @@ export default defineModule({
   icon: 'briefcase',
   main: MainWrapper,
   api: { basePath: '/api/odoo' },
-  slots: wrappedSlots as never,
+  slots: withModuleProvider(viewerSlots) as never,
 });
