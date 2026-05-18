@@ -31,7 +31,7 @@
     "react-router-dom": "^6.26.0"
   },
   "devDependencies": {
-    "@nekazari/module-builder": "^2.0.0",
+    "@nekazari/module-builder": "^2.0.3",
     "@nekazari/module-kit": "^0.6.2",
     "@nekazari/sdk": "^1.0.5",
     "@types/react": "^18.3.3",
