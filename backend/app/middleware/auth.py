@@ -109,19 +109,48 @@ class JWTAuthMiddleware(BaseHTTPMiddleware):
         try:
             jwks_client = get_jwks_client()
             signing_key = jwks_client.get_signing_key_from_jwt(token)
-            
-            expected_issuer = f"{settings.KEYCLOAK_URL}/realms/{settings.KEYCLOAK_REALM}"
+
+            # Build issuer whitelist (internal + public, with/without /auth)
+            allowed_issuers = set()
+            realm_suffix = f"/realms/{settings.KEYCLOAK_REALM}"
+
+            for base_url in [settings.KEYCLOAK_URL, settings.KEYCLOAK_PUBLIC_URL]:
+                if not base_url:
+                    continue
+                clean = base_url.rstrip("/")
+                if "/auth" not in clean and not clean.endswith("/realms"):
+                    clean = f"{clean}/auth"
+                allowed_issuers.add(f"{clean}{realm_suffix}")
+                # Also add without /auth variant (modern Keycloak)
+                allowed_issuers.add(f"{clean.replace('/auth', '')}{realm_suffix}")
 
             # Keycloak tokens may not include 'aud' claim depending on configuration
-            # Validate signature and issuer, skip audience validation
+            # Validate signature, skip audience and issuer validation (manual check below)
             payload = jwt.decode(
                 token,
                 signing_key.key,
                 algorithms=["RS256"],
-                issuer=expected_issuer,
-                options={"verify_aud": False}
+                options={"verify_aud": False, "verify_iss": False},
             )
-            
+
+            # Manual issuer validation with /auth flexibility
+            token_iss = payload.get("iss", "")
+            is_valid = token_iss in allowed_issuers
+            if not is_valid and token_iss:
+                clean_iss = token_iss.replace("/auth/realms/", "/realms/")
+                for base in list(allowed_issuers):
+                    clean_base = base.replace("/auth/realms/", "/realms/")
+                    if clean_base == clean_iss:
+                        is_valid = True
+                        break
+
+            if not is_valid:
+                logger.warning(
+                    "Token issuer %s not in allowed issuers %s",
+                    token_iss, allowed_issuers,
+                )
+                raise jwt.InvalidTokenError("Invalid token issuer")
+
             logger.debug(f"Token validated for user: {payload.get('preferred_username', 'unknown')}")
             return payload
 
