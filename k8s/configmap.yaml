@@ -3,7 +3,7 @@
 # Non-sensitive configuration. Replace YOUR_DOMAIN at deploy time for your
 # environment (e.g. via sed, kustomize, or manual edit on the server).
 #
-# Author: Kate Benetis <kate@robotika.cloud>
+# Author: Kate Benetis <kate@example.com>
 # Company: Robotika
 # License: AGPL-3.0
 

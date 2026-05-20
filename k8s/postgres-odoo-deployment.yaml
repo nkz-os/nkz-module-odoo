@@ -3,7 +3,7 @@
 # Dedicated PostgreSQL instance for Odoo databases.
 # Multi-DB: One database per tenant (nkz_odoo_{tenant_id})
 #
-# Author: Kate Benetis <kate@robotika.cloud>
+# Author: Kate Benetis <kate@example.com>
 # Company: Robotika
 # License: AGPL-3.0
 
