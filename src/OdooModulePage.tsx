@@ -22,6 +22,7 @@ import {
   Shield,
 } from 'lucide-react';
 import { useTranslation } from '@nekazari/sdk';
+import { Button, Card, Spinner, Badge, EmptyState, Surface, Stack, Inline } from '@nekazari/ui-kit';
 import { OdooProvider, useOdoo } from './services/context';
 
 function OdooModulePageContent() {
@@ -43,26 +44,24 @@ function OdooModulePageContent() {
 
   if (isLoading) {
     return (
-      <div className="odoo-module-page">
-        <div className="odoo-module-page__loading">
-          <div className="odoo-spinner" />
-          <p>{t('main.loading')}</p>
-        </div>
+      <div className="p-nkz-section flex flex-col items-center gap-nkz-stack">
+        <Spinner size="lg" />
+        <p className="text-nkz-sm text-nkz-text-secondary">{t('main.loading')}</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="odoo-module-page">
-        <div className="odoo-module-page__card odoo-module-page__card--error">
-          <h2>{t('main.errorTitle')}</h2>
-          <p>{error}</p>
-          <button className="odoo-btn odoo-btn-primary" onClick={refreshTenant}>
+      <Card padding="lg">
+        <Stack gap="stack" align="center">
+          <h2 className="text-nkz-lg font-semibold text-nkz-text-primary">{t('main.errorTitle')}</h2>
+          <p className="text-nkz-sm text-nkz-text-secondary">{error}</p>
+          <Button variant="primary" onClick={refreshTenant}>
             {t('main.retry')}
-          </button>
-        </div>
-      </div>
+          </Button>
+        </Stack>
+      </Card>
     );
   }
 
@@ -75,7 +74,6 @@ function OdooModulePageContent() {
     }
   };
 
-  // Prefer SSO login URL (auto-login via Keycloak) over plain Odoo URL
   const odooUrl =
     tenantInfo?.odooUrl ||
     (typeof window !== 'undefined' && (window as any).__ENV__?.ODOO_PUBLIC_URL) ||
@@ -85,81 +83,110 @@ function OdooModulePageContent() {
   const hasSso = Boolean(tenantInfo?.odooLoginUrl);
 
   return (
-    <div className="odoo-module-page">
-      <div className="odoo-module-page__hero">
-        <div className="odoo-module-page__hero-icon">
-          <Building2 size={56} />
-        </div>
-        <h1 className="odoo-module-page__title">{t('main.heroTitle')}</h1>
-        <p className="odoo-module-page__lead">{t('main.lead')}</p>
-      </div>
-
-      <div className="odoo-module-page__features">
-        <h2 className="odoo-module-page__features-title">{t('main.featuresTitle')}</h2>
-        <ul className="odoo-module-page__features-list">
-          {features.map(({ icon: Icon, label }) => (
-            <li key={label} className="odoo-module-page__feature">
-              <Icon size={20} className="odoo-module-page__feature-icon" />
-              <span>{label}</span>
-            </li>
-          ))}
-        </ul>
-      </div>
-
-      <div className="odoo-module-page__card odoo-module-page__card--cta">
-        {!tenantInfo ? (
-          <>
-            <p className="odoo-module-page__card-text">{t('main.notProvisioned')}</p>
-            <button
-              className="odoo-btn odoo-btn-primary odoo-module-page__btn"
-              onClick={handleProvision}
-              disabled={isProvisioning}
-            >
-              {isProvisioning ? (
-                <>
-                  <RefreshCw size={20} className="animate-spin" />
-                  {t('main.provisioningBtn')}
-                </>
-              ) : (
-                <>
-                  <Settings size={20} />
-                  {t('main.provisionCta')}
-                </>
-              )}
-            </button>
-          </>
-        ) : tenantInfo.status === 'provisioning' ? (
-          <div className="odoo-module-page__loading">
-            <div className="odoo-spinner" />
-            <p>{t('main.provisioningTitle')}</p>
-            <p className="odoo-module-page__hint">{t('main.provisioningHint')}</p>
+    <Stack gap="section">
+      {/* Hero */}
+      <Surface variant="default" padding="section" radius="lg">
+        <Stack gap="stack" align="center">
+          <div className="text-nkz-accent-base">
+            <Building2 size={56} />
           </div>
-        ) : loginUrl ? (
-          <>
-            <p className="odoo-module-page__card-text">
-              {hasSso ? t('main.readySso') : t('main.readyPlain')}
+          <h1 className="text-nkz-2xl font-bold text-nkz-text-primary text-center">
+            {t('main.heroTitle')}
+          </h1>
+          <p className="text-nkz-base text-nkz-text-secondary text-center max-w-2xl">
+            {t('main.lead')}
+          </p>
+        </Stack>
+      </Surface>
+
+      {/* Features */}
+      <Card padding="lg">
+        <Stack gap="stack">
+          <h2 className="text-nkz-lg font-semibold text-nkz-text-primary">
+            {t('main.featuresTitle')}
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-nkz-inline">
+            {features.map(({ icon: Icon, label }) => (
+              <div
+                key={label}
+                className="flex items-center gap-nkz-inline p-nkz-inline bg-nkz-surface-sunken rounded-nkz-md"
+              >
+                <span className="text-nkz-accent-base">
+                  <Icon size={20} />
+                </span>
+                <span className="text-nkz-sm text-nkz-text-primary">{label}</span>
+              </div>
+            ))}
+          </div>
+        </Stack>
+      </Card>
+
+      {/* CTA / Status Card */}
+      <Card padding="lg">
+        <Stack gap="stack" align="center">
+          {!tenantInfo ? (
+            <>
+              <p className="text-nkz-sm text-nkz-text-secondary text-center">
+                {t('main.notProvisioned')}
+              </p>
+              <Button
+                variant="primary"
+                size="lg"
+                onClick={handleProvision}
+                disabled={isProvisioning}
+                leadingIcon={
+                  isProvisioning ? (
+                    <RefreshCw size={20} className="animate-spin" />
+                  ) : (
+                    <Settings size={20} />
+                  )
+                }
+              >
+                {isProvisioning ? t('main.provisioningBtn') : t('main.provisionCta')}
+              </Button>
+            </>
+          ) : tenantInfo.status === 'provisioning' ? (
+            <Stack gap="stack" align="center">
+              <Spinner size="md" />
+              <p className="text-nkz-base font-medium text-nkz-text-primary">
+                {t('main.provisioningTitle')}
+              </p>
+              <p className="text-nkz-sm text-nkz-text-muted">
+                {t('main.provisioningHint')}
+              </p>
+            </Stack>
+          ) : loginUrl ? (
+            <>
+              <p className="text-nkz-sm text-nkz-text-secondary text-center">
+                {hasSso ? t('main.readySso') : t('main.readyPlain')}
+              </p>
+              <Button
+                variant="primary"
+                size="lg"
+                href={loginUrl}
+                leadingIcon={<ExternalLink size={20} />}
+              >
+                {hasSso ? t('main.enterOdoo') : t('main.openOdoo')}
+              </Button>
+              <Inline gap="tight" align="center">
+                <span className="text-nkz-xs text-nkz-text-muted">
+                  {t('main.database', {
+                    name: tenantInfo.odooDatabase || t('main.defaultDatabaseName'),
+                  })}
+                </span>
+                {hasSso && (
+                  <Badge intent="positive">{t('main.ssoBadge')}</Badge>
+                )}
+              </Inline>
+            </>
+          ) : (
+            <p className="text-nkz-sm text-nkz-text-secondary text-center">
+              {t('main.urlMissing')}
             </p>
-            <a
-              href={loginUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="odoo-btn odoo-btn-primary odoo-module-page__btn"
-            >
-              <ExternalLink size={20} />
-              {hasSso ? t('main.enterOdoo') : t('main.openOdoo')}
-            </a>
-            <p className="odoo-module-page__hint">
-              {t('main.database', {
-                name: tenantInfo.odooDatabase || t('main.defaultDatabaseName'),
-              })}
-              {hasSso && <span className="odoo-module-page__sso-badge">{t('main.ssoBadge')}</span>}
-            </p>
-          </>
-        ) : (
-          <p className="odoo-module-page__card-text">{t('main.urlMissing')}</p>
-        )}
-      </div>
-    </div>
+          )}
+        </Stack>
+      </Card>
+    </Stack>
   );
 }
 
@@ -167,7 +194,7 @@ function OdooModulePageContent() {
 export default function OdooModulePage() {
   return (
     <OdooProvider>
-      <div className="odoo-module odoo-module-page__wrap">
+      <div className="p-nkz-section">
         <OdooModulePageContent />
       </div>
     </OdooProvider>

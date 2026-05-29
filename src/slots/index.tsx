@@ -35,20 +35,19 @@ export const viewerSlots: ModuleViewerSlots = {
       showWhen: {
         entityType: ['AgriParcel', 'Device', 'Building']
       }
+    },
+    {
+      id: 'odoo-quick-actions',
+      moduleId: MODULE_ID,
+      component: 'OdooQuickActions',
+      priority: 80,
+      localComponent: OdooQuickActions,
     }
   ],
 
   'bottom-panel': [],
 
-  'entity-tree': [
-    {
-      id: 'odoo-quick-actions',
-      moduleId: MODULE_ID,
-      component: 'OdooQuickActions',
-      priority: 50,
-      localComponent: OdooQuickActions,
-    }
-  ],
+  'entity-tree': [],
 
   'map-layer': [],
 

@@ -7,7 +7,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from '@nekazari/sdk';
-import { SlotShellCompact } from '@nekazari/viewer-kit';
+import { SlotShell } from '@nekazari/viewer-kit';
 import { Spinner, Stack } from '@nekazari/ui-kit';
 import {
   Building2,
@@ -106,40 +106,28 @@ const OdooQuickActions: React.FC<SlotWidgetProps> = () => {
 
   if (isLoading) {
     return (
-      <SlotShellCompact moduleId="odoo-erp" accent={odooAccent}>
-        <div className="flex items-center gap-2">
-          <Building2 size={20} className="text-nkz-accent-base" />
-          <span className="text-nkz-sm font-medium text-nkz-text-primary">{t('quickActions.title')}</span>
-        </div>
+      <SlotShell moduleId="odoo-erp" title={t('quickActions.title')} icon={<Building2 className="w-4 h-4" />} collapsible accent={odooAccent}>
         <div className="flex items-center gap-2 p-nkz-inline">
           <Spinner size="sm" />
           <span className="text-nkz-sm text-nkz-text-secondary">{t('quickActions.loading')}</span>
         </div>
-      </SlotShellCompact>
+      </SlotShell>
     );
   }
 
   if (!odooBaseUrl) {
     return (
-      <SlotShellCompact moduleId="odoo-erp" accent={odooAccent}>
-        <div className="flex items-center gap-2">
-          <Building2 size={20} className="text-nkz-accent-base" />
-          <span className="text-nkz-sm font-medium text-nkz-text-primary">{t('quickActions.title')}</span>
-        </div>
+      <SlotShell moduleId="odoo-erp" title={t('quickActions.title')} icon={<Building2 className="w-4 h-4" />} collapsible accent={odooAccent}>
         <div className="text-nkz-sm text-nkz-text-muted p-nkz-inline">
           {t('quickActions.notConfigured')}
         </div>
-      </SlotShellCompact>
+      </SlotShell>
     );
   }
 
   return (
-    <SlotShellCompact moduleId="odoo-erp" accent={odooAccent}>
-      <div className="flex items-center justify-between mb-1">
-        <div className="flex items-center gap-2">
-          <Building2 size={20} className="text-nkz-accent-base" />
-          <span className="text-nkz-sm font-medium text-nkz-text-primary">{t('quickActions.title')}</span>
-        </div>
+    <SlotShell moduleId="odoo-erp" title={t('quickActions.title')} icon={<Building2 className="w-4 h-4" />} collapsible accent={odooAccent}>
+      <div className="flex justify-end mb-1">
         <a
           href={odooBaseUrl}
           target="_blank"
@@ -180,7 +168,7 @@ const OdooQuickActions: React.FC<SlotWidgetProps> = () => {
           <span className="text-nkz-warning-strong">{t('quickActions.pendingSync', { count: stats.pendingSync })}</span>
         </div>
       )}
-    </SlotShellCompact>
+    </SlotShell>
   );
 };
 

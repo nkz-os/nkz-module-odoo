@@ -86,16 +86,16 @@
         "showWhen": {
           "entityType": ["AgriParcel", "Device", "Building"]
         }
-      }
-    ],
-    "bottom-panel": [],
-    "entity-tree": [
+      },
       {
         "id": "odoo-quick-actions",
         "component": "OdooQuickActions",
-        "priority": 50
+        "priority": 80,
+        "tab": "ERP"
       }
     ],
+    "bottom-panel": [],
+    "entity-tree": [],
     "map-layer": []
   },
 
@@ -177,15 +177,15 @@
             "showWhen": {
               "entityType": ["AgriParcel", "Device", "Building"]
             }
-          }
-        ],
-        "entity-tree": [
+          },
           {
             "id": "odoo-quick-actions",
             "component": "OdooQuickActions",
-            "priority": 50
+            "priority": 80,
+            "tab": "ERP"
           }
         ],
+        "entity-tree": [],
         "layer-toggle": [],
         "bottom-panel": [],
         "map-layer": []
