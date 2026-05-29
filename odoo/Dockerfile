@@ -19,7 +19,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # The system pip (20.3.4) is broken due to pyOpenSSL/cryptography mismatch.
 # Bootstrap a fresh pip without touching system pyOpenSSL (which Odoo needs).
-RUN curl -sS https://bootstrap.pypa.io/get-pip.py | python3 - --no-cache-dir
+RUN curl -sS https://bootstrap.pypa.io/pip/3.9/get-pip.py | python3 - --no-cache-dir
 
 # Python deps required by energy modules and OCA addons.
 # CRITICAL: pin cryptography<4 to preserve compatibility with system pyOpenSSL
