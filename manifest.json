@@ -4,6 +4,14 @@
   "display_name": "Odoo ERP Integration",
   "version": "1.0.0",
   "description": "Multitenant Odoo ERP integration for farm and energy community management. Includes Som Comunitats modules for solar installations and energy self-consumption projects.",
+  "description_i18n": {
+    "es": "Integración Odoo ERP multitenant para gestión de fincas y comunidades energéticas. Incluye módulos Som Comunitats para instalaciones solares y proyectos de autoconsumo energético.",
+    "en": "Multitenant Odoo ERP integration for farm and energy community management. Includes Som Comunitats modules for solar installations and energy self-consumption projects.",
+    "eu": "Odoo ERP multi-tenant integrazioa baserri eta energia-komunitateen kudeaketarako. Som Comunitats moduluak barne eguzki-instalazioetarako eta energia-autokontsumo proiektuetarako.",
+    "fr": "Intégration Odoo ERP multi-tenant pour la gestion des fermes et des communautés énergétiques. Inclut les modules Som Comunitats pour les installations solaires et les projets d'autoconsommation énergétique.",
+    "pt": "Integração Odoo ERP multitenant para gestão de fazendas e comunidades energéticas. Inclui módulos Som Comunitats para instalações solares e projetos de autoconsumo energético.",
+    "ca": "Integració Odoo ERP multitenant per a gestió de finques i comunitats energètiques. Inclou mòduls Som Comunitats per a instal·lacions solars i projectes d'autoconsum energètic."
+  },
   "category": "integration",
   "module_type": "ADDON_PAID",
   "required_plan_type": "premium",
