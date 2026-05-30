@@ -124,8 +124,22 @@ RUN mkdir -p /opt/odoo/custom-addons && \
 # Fix energy_communities/hooks.py: api.Environment.manage() was removed in Odoo 16
 COPY patches/energy_communities_hooks.py /opt/odoo/custom-addons/energy_communities/hooks.py
 # Fix energy_communities: respect Nekazari OAuth provider (use email as login, not UUID)
-COPY patches/energy_communities_nekazari_sso.patch /tmp/ec-nekazari-sso.patch
-RUN cd /opt/odoo/custom-addons && patch -p1 < /tmp/ec-nekazari-sso.patch && rm /tmp/ec-nekazari-sso.patch
+# energy_communities overrides _generate_signup_values to set login=UUID,
+# which breaks Nekazari SSO (login must be email for OAuth compatibility).
+RUN python3 -c "
+import re
+path = '/opt/odoo/custom-addons/energy_communities/models/res_users.py'
+with open(path) as f: content = f.read()
+old = 'values[\"login\"] = validation[\"user_id\"]'
+new = '''oauth_provider = self.env[\"auth.oauth.provider\"].browse(provider)
+        if oauth_provider.name and \"nekazari\" in oauth_provider.name.lower():
+            return super(ResUsers, self)._generate_signup_values(provider, validation, params)
+        values[\"login\"] = validation[\"user_id\"]'''
+assert old in content, 'Could not find target line in energy_communities'
+content = content.replace(old, new, 1)
+with open(path, 'w') as f: f.write(content)
+print('Patched energy_communities._generate_signup_values for Nekazari SSO')
+"
 
 COPY addons/nekazari_connector /opt/odoo/custom-addons/nekazari_connector
 COPY addons/nekazari_web_theme /opt/odoo/custom-addons/nekazari_web_theme
