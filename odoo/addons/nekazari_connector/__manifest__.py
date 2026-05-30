@@ -36,7 +36,6 @@ For more information, visit: https://nekazari.com
     'data': [
         'security/ir.model.access.csv',
         'views/menu_views.xml',
-        'data/cron_data.xml',
     ],
     'demo': [],
     'installable': True,
