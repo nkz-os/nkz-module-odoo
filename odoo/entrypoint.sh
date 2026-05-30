@@ -49,7 +49,7 @@ if ! PGPASSWORD="${PASSWORD}" psql -h "${HOST}" -U "${USER}" -lqt | cut -d \| -f
          --db_password="${PASSWORD}" \
          --db-template=template1 \
          -d "$TEMPLATE_DB" \
-         -i base,web,sale,purchase,stock,account,maintenance,auth_oauth \
+         -i base,web,sale,purchase,stock,account,maintenance,auth_oauth,auth_oidc \
          --stop-after-init \
          --without-demo=all
 

@@ -286,23 +286,50 @@ class OdooClient:
             return provider_id
 
         base_url = f"{keycloak_public_url}/realms/{realm}/protocol/openid-connect"
+        # Internal Keycloak URL for server-to-server calls (avoids hairpin NAT)
+        # The Odoo pod cannot reach the public auth URL from inside the cluster.
+        keycloak_internal = getattr(settings, 'KEYCLOAK_URL', keycloak_public_url).rstrip('/')
+        # If internal URL uses /auth suffix, strip it; Keycloak service is at root /realms/...
+        if '/auth' in keycloak_internal:
+            keycloak_internal = keycloak_internal.replace('/auth', '')
+        internal_base = f"{keycloak_internal}/realms/{realm}/protocol/openid-connect"
 
         provider_id = client.execute("auth.oauth.provider", "create", {
             "name": "Nekazari (Keycloak)",
-            "flow": "access_token",
+            "flow": "id_token_code",          # OpenID Connect authorization code flow
             "client_id": client_id,
             "enabled": True,
             "body": "Login with Nekazari",
+            # Browser-facing URL (public, user's browser reaches this)
             "auth_endpoint": f"{base_url}/auth",
             "scope": "openid email profile",
-            "validation_endpoint": f"{base_url}/token/introspect",
-            "data_endpoint": f"{base_url}/userinfo",
+            # Server-to-server URLs (internal, Odoo pod reaches these)
+            "token_endpoint": f"{internal_base}/token",
+            "validation_endpoint": f"{internal_base}/userinfo",
+            "data_endpoint": f"{internal_base}/userinfo",
+            "jwks_uri": f"{internal_base}/certs",
+            # Map Keycloak's sub claim to Odoo's user_id
+            "token_map": "sub:user_id email:email name:name",
             "css_class": "fa fa-fw fa-sign-in text-primary",
             "sequence": 10,
         })
 
         logger.info(f"OAuth provider created: ID {provider_id}")
         return provider_id
+
+    async def enable_oauth_signup(self, db_name: str):
+        """Enable free signup for OAuth users.
+
+        Sets auth_signup_uninvited = True so that OAuth-authenticated
+        users can auto-create their Odoo account on first login."""
+        client = OdooClient(database=db_name)
+        client.authenticate("admin", settings.ODOO_ADMIN_PASSWORD or "admin")
+
+        client.execute(
+            "ir.config_parameter", "set_param",
+            ["auth_signup_uninvited", "True"]
+        )
+        logger.info(f"Enabled free OAuth signup in {db_name}")
 
     async def get_oauth_provider_id(self, db_name: str, client_id: str) -> Optional[int]:
         """Get the OAuth provider ID for a given client_id, or None."""

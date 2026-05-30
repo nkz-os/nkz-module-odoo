@@ -155,6 +155,8 @@ async def provision_tenant(
                     realm=settings.KEYCLOAK_REALM,
                     client_id=settings.ODOO_OAUTH_CLIENT_ID,
                 )
+                # Enable free OAuth signup so users auto-create accounts on first login
+                await odoo_client.enable_oauth_signup(db_name)
             except Exception as oauth_err:
                 logger.warning(f"OAuth provider setup failed (non-fatal): {oauth_err}")
 
