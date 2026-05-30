@@ -123,6 +123,9 @@ RUN mkdir -p /opt/odoo/custom-addons && \
 
 # Fix energy_communities/hooks.py: api.Environment.manage() was removed in Odoo 16
 COPY patches/energy_communities_hooks.py /opt/odoo/custom-addons/energy_communities/hooks.py
+# Fix energy_communities: respect Nekazari OAuth provider (use email as login, not UUID)
+COPY patches/energy_communities_nekazari_sso.patch /tmp/ec-nekazari-sso.patch
+RUN cd /opt/odoo/custom-addons && patch -p1 < /tmp/ec-nekazari-sso.patch && rm /tmp/ec-nekazari-sso.patch
 
 COPY addons/nekazari_connector /opt/odoo/custom-addons/nekazari_connector
 COPY addons/nekazari_web_theme /opt/odoo/custom-addons/nekazari_web_theme
