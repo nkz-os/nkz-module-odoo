@@ -28,7 +28,7 @@ spec:
     spec:
       containers:
         - name: odoo
-          image: ghcr.io/nkz-os/nkz-module-odoo/odoo:latest
+          image: ghcr.io/nkz-os/nkz-module-odoo/odoo@sha256:db95298e181c0843afc3b896cf281fa69de990c06cbb283bd9b3585b0d60d4f9
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
