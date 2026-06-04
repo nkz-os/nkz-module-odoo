@@ -22,12 +22,19 @@ if [[ -n "$EXISTING" && "$FORCE" != "true" ]]; then
 fi
 
 NEW_PASS=$(openssl rand -base64 24)
-B64=$(echo -n "$NEW_PASS" | base64 -w0 2>/dev/null || echo -n "$NEW_PASS" | base64)
 
-kubectl patch secret "$SECRET_NAME" -n "$NAMESPACE" --type=json \
-  -p="[{\"op\":\"add\",\"path\":\"/data/$KEY_NAME\",\"value\":\"$B64\"}]" 2>/dev/null || \
-kubectl patch secret "$SECRET_NAME" -n "$NAMESPACE" --type=json \
-  -p="[{\"op\":\"replace\",\"path\":\"/data/$KEY_NAME\",\"value\":\"$B64\"}]"
+# Get all existing keys from the secret
+EXISTING_ARGS=()
+while IFS= read -r key; do
+  val=$(kubectl get secret "$SECRET_NAME" -n "$NAMESPACE" -o jsonpath="{.data.${key}}" 2>/dev/null || true)
+  [[ -n "$val" ]] && EXISTING_ARGS+=(--from-literal="$key=$(echo "$val" | base64 -d)")
+done < <(kubectl get secret "$SECRET_NAME" -n "$NAMESPACE" -o jsonpath='{.data}' | jq -r 'keys[]' 2>/dev/null || true)
+
+# Recreate secret with existing keys + new key using kubectl apply
+kubectl create secret generic "$SECRET_NAME" -n "$NAMESPACE" \
+  "${EXISTING_ARGS[@]}" \
+  --from-literal="$KEY_NAME=$NEW_PASS" \
+  --dry-run=client -o yaml | kubectl apply -f -
 
 echo "Added $KEY_NAME to $SECRET_NAME. Store this password and set it for the Odoo template admin user:"
 echo "$NEW_PASS"
