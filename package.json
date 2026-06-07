@@ -1,6 +1,7 @@
 {
   "name": "nkz-module-odoo",
   "version": "1.0.0",
+  "packageManager": "pnpm@9.0.0",
   "description": "Nekazari Odoo ERP Integration Module - Multitenant farm and energy community management",
   "author": {
     "name": "Kate Benetis",
