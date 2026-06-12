@@ -32,9 +32,11 @@ For more information, visit: https://nekazari.com
         'purchase',
         'stock',
         'maintenance',
+        'project',
     ],
     'data': [
         'security/ir.model.access.csv',
+        'data/cron_data.xml',
         'views/menu_views.xml',
     ],
     'demo': [],

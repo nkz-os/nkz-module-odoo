@@ -50,7 +50,8 @@ NGSI_TO_ODOO_MODEL = {
     "Building": "res.partner",
     "EnergyMeter": "energy.meter",
     "SolarPanel": "energy.installation",
-    "WeatherStation": "maintenance.equipment"
+    "WeatherStation": "maintenance.equipment",
+    "AgriParcelOperation": "project.task"
 }
 
 
@@ -278,6 +279,8 @@ class NgsildSyncService:
             values.update(self._transform_solar_panel(entity))
         elif entity_type == "Building":
             values.update(self._transform_building(entity))
+        elif entity_type == "AgriParcelOperation":
+            values.update(self._transform_agri_parcel_operation(entity))
 
         return values
 
@@ -327,6 +330,20 @@ class NgsildSyncService:
             "city": address.get("addressLocality"),
             "zip": address.get("postalCode"),
             "country_id": False  # Would need to look up country
+        }
+
+    def _transform_agri_parcel_operation(self, entity: dict) -> dict:
+        """Transform AgriParcelOperation to project.task."""
+        op_type = self._get_property_value(entity, "operationType", "")
+        work_order = self._get_property_value(entity, "workOrder", "")
+
+        return {
+            "name": f"{op_type} - {work_order}",
+            "description": self._get_property_value(entity, "description", ""),
+            "planned_date_begin": self._get_property_value(entity, "plannedDate"),
+            "date_deadline": self._get_property_value(entity, "plannedDate"),
+            "date_end": self._get_property_value(entity, "endedAt"),
+            "user_id": False,  # Would need user mapping
         }
 
     def _get_property_value(self, entity: dict, property_name: str, default: Any = None) -> Any:

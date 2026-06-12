@@ -11,3 +11,4 @@ from . import product_template
 from . import maintenance_equipment
 from . import res_partner
 from . import nekazari_sync_log
+from . import work_order

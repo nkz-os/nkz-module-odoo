@@ -1,3 +1,4 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_nekazari_sync_log_user,nekazari.sync.log.user,model_nekazari_sync_log,base.group_user,1,0,0,0
 access_nekazari_sync_log_manager,nekazari.sync.log.manager,model_nekazari_sync_log,base.group_system,1,1,1,1
+access_project_task_nekazari,project.task.nekazari,project.model_project_task,base.group_user,1,1,1,0

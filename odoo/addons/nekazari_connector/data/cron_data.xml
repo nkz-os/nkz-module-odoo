@@ -43,4 +43,15 @@ old_logs.unlink()
         <field name="numbercall">-1</field>
         <field name="active">True</field>
     </record>
+    <!-- Publish pending work orders to Nekazari (AgriParcelOperation sync) -->
+    <record id="cron_publish_work_orders" model="ir.cron">
+        <field name="name">Publish work orders to Nekazari</field>
+        <field name="model_id" ref="project.model_project_task"/>
+        <field name="state">code</field>
+        <field name="code">model.cron_publish_pending_work_orders()</field>
+        <field name="interval_number">5</field>
+        <field name="interval_type">minutes</field>
+        <field name="numbercall">-1</field>
+        <field name="active">True</field>
+    </record>
 </odoo>
