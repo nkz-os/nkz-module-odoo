@@ -19,6 +19,7 @@ import os
 from app.config import settings
 from app.services.odoo_client import OdooClient
 from app.services.database import (
+from app.common.tenant_utils import normalize_tenant_id
     get_tenant_odoo_info,
     get_entity_mapping_by_ngsi_id,
     create_entity_mapping
@@ -28,9 +29,7 @@ logger = logging.getLogger(__name__)
 
 
 def _make_headers(tenant_id: str) -> dict:
-    n = tenant_id.lower().strip().replace('-', '_').replace(' ', '_')
-    n = re.sub(r'[^a-z0-9_]', '', n)
-    n = n.strip('_') or tenant_id
+    n = normalize_tenant_id(tenant_id)
     headers = {
         "NGSILD-Tenant": n,
         "Fiware-Service": n,
