@@ -106,3 +106,7 @@ docs/audits/
 *HANDOVER*.md
 HANDOFF.md
 CURRENT_STATE.md
+apikey_*.txt
+*.apikey
+*_api_key.txt
+*-secret*
