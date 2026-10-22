@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <!-- ═══ Browser tab title: "Odoo" → "Nekazari" ═══════════════════════ -->
+    <template id="nekazari_title" inherit_id="web.layout" name="Nekazari Title">
+        <xpath expr="//head/title" position="replace">
+            <title t-esc="title or 'Nekazari'"/>
+        </xpath>
+        <xpath expr="//head/link[@rel='shortcut icon']" position="replace">
+            <link type="image/svg+xml" rel="shortcut icon"
+                  href="/nekazari_web_theme/static/src/img/favicon.svg"/>
+        </xpath>
+    </template>
+
+    <!-- ═══ Replace "Powered by Odoo" branding with Nekazari ═════════════ -->
+    <template id="nekazari_brand_promotion" inherit_id="web.brand_promotion_message"
+              name="Nekazari Brand Promotion">
+        <xpath expr="." position="replace">
+            <t t-set="nekazari_link">
+                <a target="_blank" href="https://nekazari.YOUR_DOMAIN"
+                   class="badge text-bg-light">
+                    Nekazari
+                </a>
+            </t>
+            <t t-set="final_message">Powered by %s</t>
+            <t t-out="final_message % (nekazari_link,)"/>
+        </xpath>
+    </template>
+
+</odoo>

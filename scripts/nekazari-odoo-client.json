@@ -1,0 +1,61 @@
+{
+  "clientId": "nekazari-odoo",
+  "name": "Nekazari Odoo SSO",
+  "description": "OpenID Connect client for Odoo ERP module SSO via auth_oauth",
+  "enabled": true,
+  "protocol": "openid-connect",
+  "publicClient": true,
+  "standardFlowEnabled": true,
+  "implicitFlowEnabled": true,
+  "directAccessGrantsEnabled": false,
+  "serviceAccountsEnabled": false,
+  "rootUrl": "https://odoo.YOUR_DOMAIN",
+  "baseUrl": "/web",
+  "redirectUris": [
+    "https://odoo.YOUR_DOMAIN/*"
+  ],
+  "webOrigins": [
+    "https://odoo.YOUR_DOMAIN",
+    "https://YOUR_FRONTEND_DOMAIN"
+  ],
+  "attributes": {
+    "post.logout.redirect.uris": "https://odoo.YOUR_DOMAIN/*",
+    "pkce.code.challenge.method": ""
+  },
+  "protocolMappers": [
+    {
+      "name": "email",
+      "protocol": "openid-connect",
+      "protocolMapper": "oidc-usermodel-property-mapper",
+      "config": {
+        "claim.name": "email",
+        "user.attribute": "email",
+        "id.token.claim": "true",
+        "access.token.claim": "true",
+        "userinfo.token.claim": "true"
+      }
+    },
+    {
+      "name": "full-name",
+      "protocol": "openid-connect",
+      "protocolMapper": "oidc-full-name-mapper",
+      "config": {
+        "id.token.claim": "true",
+        "access.token.claim": "true",
+        "userinfo.token.claim": "true"
+      }
+    },
+    {
+      "name": "tenant-id",
+      "protocol": "openid-connect",
+      "protocolMapper": "oidc-usermodel-attribute-mapper",
+      "config": {
+        "claim.name": "tenant_id",
+        "user.attribute": "tenant_id",
+        "id.token.claim": "true",
+        "access.token.claim": "true",
+        "userinfo.token.claim": "true"
+      }
+    }
+  ]
+}

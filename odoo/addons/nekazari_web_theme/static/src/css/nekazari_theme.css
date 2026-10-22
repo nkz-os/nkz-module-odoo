@@ -1,0 +1,139 @@
+/* Nekazari Web Theme — Odoo 16 colour overrides
+ *
+ * Replaces Odoo's default purple (#714B67) with the Nekazari green palette.
+ * Colour values sourced from the host platform's tailwind.config.js.
+ */
+
+:root {
+    --o-brand-odoo: #16a34a;
+    --o-brand-primary: #16a34a;
+}
+
+/* ─── Navbar ──────────────────────────────────────────────────────────── */
+
+.o_main_navbar {
+    background-color: #166534 !important;
+}
+
+.o_main_navbar .o_menu_brand,
+.o_main_navbar .o_menu_entry,
+.o_main_navbar > a,
+.o_main_navbar > button,
+.o_main_navbar .dropdown-toggle {
+    color: #f0fdf4 !important;
+}
+
+.o_main_navbar .o_menu_entry:hover,
+.o_main_navbar > a:hover,
+.o_main_navbar .dropdown-toggle:hover {
+    background-color: #15803d !important;
+}
+
+.o_main_navbar .o_menu_entry.active,
+.o_main_navbar .o_menu_entry:focus {
+    background-color: #14532d !important;
+}
+
+/* ─── Buttons ─────────────────────────────────────────────────────────── */
+
+.btn-primary {
+    background-color: #16a34a !important;
+    border-color: #16a34a !important;
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+    background-color: #15803d !important;
+    border-color: #15803d !important;
+}
+
+.btn-primary:active,
+.btn-primary.active {
+    background-color: #14532d !important;
+    border-color: #14532d !important;
+}
+
+/* ─── Links ───────────────────────────────────────────────────────────── */
+
+a {
+    color: #16a34a;
+}
+
+a:hover {
+    color: #15803d;
+}
+
+/* ─── Selection / Checkbox accent ─────────────────────────────────────── */
+
+.form-check-input:checked {
+    background-color: #16a34a;
+    border-color: #16a34a;
+}
+
+.form-check-input:focus {
+    border-color: #22c55e;
+    box-shadow: 0 0 0 0.25rem rgba(22, 163, 74, 0.25);
+}
+
+/* ─── Kanban / list selected rows ─────────────────────────────────────── */
+
+.o_list_view .o_data_row.o_data_row_selected {
+    background-color: #f0fdf4 !important;
+}
+
+/* ─── Control panel active filters ────────────────────────────────────── */
+
+.o_searchview .o_searchview_facet .o_facet_values {
+    background-color: #dcfce7;
+    color: #14532d;
+}
+
+/* ─── Login page ──────────────────────────────────────────────────────── */
+
+.oe_login_form .btn-primary,
+.oe_login .btn-primary {
+    background-color: #16a34a !important;
+    border-color: #16a34a !important;
+}
+
+.oe_login_form .btn-primary:hover,
+.oe_login .btn-primary:hover {
+    background-color: #15803d !important;
+    border-color: #15803d !important;
+}
+
+/* Login page background subtle gradient */
+.oe_login {
+    background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 50%, #f0fdf4 100%) !important;
+}
+
+/* ─── Loading / Progress bars ─────────────────────────────────────────── */
+
+.o_loading {
+    background-color: #16a34a !important;
+}
+
+.progress-bar {
+    background-color: #16a34a !important;
+}
+
+/* ─── Badges ──────────────────────────────────────────────────────────── */
+
+.badge.text-bg-primary,
+.badge.bg-primary {
+    background-color: #16a34a !important;
+}
+
+/* ─── Discuss / Chatter ───────────────────────────────────────────────── */
+
+.o_Message_prettyBody a {
+    color: #16a34a;
+}
+
+/* ─── Focus rings ─────────────────────────────────────────────────────── */
+
+.form-control:focus,
+.form-select:focus {
+    border-color: #22c55e;
+    box-shadow: 0 0 0 0.25rem rgba(22, 163, 74, 0.25);
+}

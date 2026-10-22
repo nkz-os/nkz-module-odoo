@@ -1,0 +1,103 @@
+# Nekazari Odoo ERP Module - Ingress
+#
+# Two ingresses:
+# 1. odoo-api-ingress: /api/odoo → FastAPI backend (on api.YOUR_DOMAIN)
+# 2. odoo-direct-ingress: odoo.YOUR_DOMAIN → Odoo 16 web UI
+#
+# Replace YOUR_DOMAIN at deploy time (e.g. example.com).
+#
+# Author: Kate Benetis <kate@example.com>
+# Company: Robotika
+# License: AGPL-3.0
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: odoo-api-ingress
+  namespace: nekazari
+  labels:
+    app: odoo-backend
+    module: odoo-erp
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: api.YOUR_DOMAIN
+      http:
+        paths:
+          - path: /api/odoo
+            pathType: Prefix
+            backend:
+              service:
+                name: odoo-backend-service
+                port:
+                  number: 80
+  tls:
+    - hosts:
+        - api.YOUR_DOMAIN
+      secretName: nkz-tls
+
+---
+# Middleware: set X-Forwarded-Host so Odoo builds correct URLs
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: odoo-headers
+  namespace: nekazari
+spec:
+  headers:
+    customRequestHeaders:
+      X-Forwarded-Proto: "https"
+      X-Forwarded-Host: "odoo.YOUR_DOMAIN"
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: odoo-direct-ingress
+  namespace: nekazari
+  labels:
+    app: odoo
+    module: odoo-erp
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+    traefik.ingress.kubernetes.io/router.middlewares: nekazari-odoo-headers@kubernetescrd
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: odoo.YOUR_DOMAIN
+      http:
+        paths:
+          # Block database management UI (security)
+          - path: /web/database/manager
+            pathType: Prefix
+            backend:
+              service:
+                name: odoo-backend-service
+                port:
+                  number: 80
+          - path: /web/database/selector
+            pathType: Prefix
+            backend:
+              service:
+                name: odoo-backend-service
+                port:
+                  number: 80
+          # All other traffic → Odoo
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: odoo-service
+                port:
+                  number: 8069
+  tls:
+    - hosts:
+        - odoo.YOUR_DOMAIN
+      secretName: odoo-tls

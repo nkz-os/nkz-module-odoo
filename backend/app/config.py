@@ -1,0 +1,97 @@
+"""
+Nekazari Odoo ERP Module - Configuration
+
+Environment-based configuration using Pydantic Settings.
+
+Author: Kate Benetis <kate@example.com>
+Company: Robotika
+License: AGPL-3.0
+"""
+
+from pydantic_settings import BaseSettings, SettingsConfigDict
+from functools import lru_cache
+
+
+class Settings(BaseSettings):
+    """Application settings loaded from environment variables."""
+
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        case_sensitive=True
+    )
+
+    # API Settings
+    API_TITLE: str = "Nekazari Odoo ERP Module API"
+    API_VERSION: str = "1.0.0"
+    DEBUG: bool = False
+
+    # Odoo Connection
+    ODOO_HOST: str = "odoo-service"
+    ODOO_PORT: int = 8069
+    ODOO_MASTER_PASSWORD: str = ""  # Must be set via env/secret in production
+    ODOO_ADMIN_PASSWORD: str = ""  # res.users admin; set via secret, never default in prod
+    ODOO_TEMPLATE_DB: str = "nkz_odoo_template"
+    # Public URL for Odoo (links returned to frontend). Empty = relative path /odoo (same origin).
+    ODOO_URL: str = ""
+
+    # PostgreSQL for Odoo
+    ODOO_DB_HOST: str = "postgres-odoo-service"
+    ODOO_DB_PORT: int = 5432
+    ODOO_DB_USER: str = "odoo"
+    ODOO_DB_PASSWORD: str = ""
+
+    # Nekazari Platform Database (for sync mappings)
+    DATABASE_URL: str = "postgresql://postgres:postgres@postgresql-service:5432/nekazari"
+
+    # Redis for job queue
+    REDIS_URL: str = "redis://redis-service:6379/0"
+
+    # Keycloak
+    KEYCLOAK_URL: str = "http://keycloak:8080/auth"
+    KEYCLOAK_REALM: str = "nekazari"
+    KEYCLOAK_CLIENT_ID: str = "nekazari-api"
+    JWKS_URL: str = ""
+
+    # Keycloak OAuth for Odoo SSO
+    KEYCLOAK_PUBLIC_URL: str = ""  # Public URL (e.g. https://auth.YOUR_DOMAIN/auth)
+    ODOO_OAUTH_CLIENT_ID: str = "nekazari-odoo"
+
+    # NGSI-LD Context Broker
+    ORION_URL: str = "http://orion-ld-service:1026"
+
+    # N8N Integration
+    N8N_URL: str = "http://n8n-service:5678"
+    N8N_WEBHOOK_SECRET: str = ""
+
+    # Intelligence Module
+    INTELLIGENCE_API_URL: str = "http://intelligence-api-service:8000"
+
+    # Allowed Origins for CORS (stored as comma-separated string)
+    ALLOWED_ORIGINS_STR: str = "http://localhost:5010,http://localhost:5173"
+
+    @property
+    def allowed_origins(self) -> list[str]:
+        """Get allowed origins as a list."""
+        return [origin.strip() for origin in self.ALLOWED_ORIGINS_STR.split(',') if origin.strip()]
+
+    @property
+    def odoo_url(self) -> str:
+        """Get full Odoo URL."""
+        return f"http://{self.ODOO_HOST}:{self.ODOO_PORT}"
+
+    @property
+    def jwks_url(self) -> str:
+        """Get JWKS URL for token validation."""
+        if self.JWKS_URL:
+            return self.JWKS_URL
+        return f"{self.KEYCLOAK_URL}/realms/{self.KEYCLOAK_REALM}/protocol/openid-connect/certs"
+
+
+@lru_cache()
+def get_settings() -> Settings:
+    """Get cached settings instance."""
+    return Settings()
+
+
+settings = get_settings()
