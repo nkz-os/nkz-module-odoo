@@ -18,8 +18,8 @@ import os
 
 from app.config import settings
 from app.services.odoo_client import OdooClient
-from app.services.database import (
 from app.common.tenant_utils import normalize_tenant_id
+from app.services.database import (
     get_tenant_odoo_info,
     get_entity_mapping_by_ngsi_id,
     create_entity_mapping
